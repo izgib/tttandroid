@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/bt_find"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="2dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginRight="2dp"
+                android:text="Поиск устройств" />
+
+            <ProgressBar
+                android:id="@+id/bt_find_progress"
+                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="false"
+                android:max="100"
+                android:progressTint="@color/colorAccent"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/bt_devices_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text='@{pairedAdapter.isEmpty() ? "Нет сопряженных устройств" : "Сопяреженные устройства" }'
+                tools:text="Сопряженные устройства" />
+
+            <ListView
+                android:id="@+id/bt_paired_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:adapter="@{pairedAdapter}" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/found_devs"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:text="Другие доступные устройcтва"
+            android:visibility="gone" />
+
+        <ListView
+            android:id="@+id/bt_found_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            app:adapter="@{foundAdapter}"
+            tools:listitem="@layout/bt_device" />
+
+    </LinearLayout>
+
+    <data>
+
+        <variable
+            name="pairedAdapter"
+            type="com.example.game.tic_tac_toe.BtDevicesAdapter" />
+
+        <variable
+            name="foundAdapter"
+            type="com.example.game.tic_tac_toe.BtDevicesAdapter" />
+    </data>
+</layout>

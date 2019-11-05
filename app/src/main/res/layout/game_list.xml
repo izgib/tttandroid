@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="com.example.game.tic_tac_toe.utils.RangeConverter" />
+
+        <import type="com.example.game.tic_tac_toe.gamesetup.SizerConverter" />
+
+        <import
+            type="com.example.game.domain.game.GameRules"
+            alias="Rules" />
+
+        <variable
+            name="gamesAdapter"
+            type="com.example.game.tic_tac_toe.GameAdapter" />
+
+        <variable
+            name="initializer"
+            type="com.example.game.tic_tac_toe.viewmodels.GameInitializerModel" />
+
+        <variable
+            name="rangeController"
+            type="com.example.game.tic_tac_toe.WinRangeController" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.appyvet.materialrangebar.RangeBar
+            android:id="@+id/rowsRange"
+            style="@style/GameSettingsRangeBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/rowsnum"
+            app:layout_constraintTop_toTopOf="parent"
+            app:leftIndex="@={SizerConverter.get(initializer.rowsLeft)}"
+            app:mrb_tickEnd='@{Rules.ROWS_MAX}'
+            app:mrb_tickStart='@{Rules.ROWS_MIN}'
+            app:rightIndex="@={SizerConverter.get(initializer.rowsRight)}" />
+
+
+        <TextView
+            android:id="@+id/rowsnum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text='@{Integer.toString(Rules.ROWS_MAX)}'
+            app:layout_constraintBottom_toTopOf="@+id/cols"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rowsRange"
+            tools:text="rows: 15" />
+
+
+        <com.appyvet.materialrangebar.RangeBar
+            android:id="@+id/cols"
+            style="@style/GameSettingsRangeBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/colsnum"
+            app:layout_constraintTop_toBottomOf="@id/rowsnum"
+            app:leftIndex="@={SizerConverter.get(initializer.colsLeft)}"
+            app:mrb_tickEnd='@{Rules.COLS_MAX}'
+            app:mrb_tickStart='@{Rules.COLS_MIN}'
+            app:rightIndex="@={SizerConverter.get(initializer.colsRight)}" />
+
+        <TextView
+            android:id="@+id/colsnum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            app:layout_constraintBottom_toTopOf="@+id/winRange"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cols"
+            tools:text="cols: 15" />
+
+
+        <com.appyvet.materialrangebar.RangeBar
+            android:id="@+id/winRange"
+            style="@style/GameSettingsRangeBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/rowlnum"
+            app:layout_constraintTop_toBottomOf="@+id/colsnum"
+            app:leftIndex="@={SizerConverter.get(initializer.winLeft)}"
+            app:mrb_tickEnd="@={RangeConverter.get(initializer.winMax)}"
+            app:mrb_tickStart='@{Rules.WIN_MIN}'
+            app:onTouchEnded="@{(view) -> rangeController.controlRange(view, initializer)}"
+            app:rightIndex="@={SizerConverter.get(initializer.winRight)}" />
+
+        <TextView
+            android:id="@+id/rowlnum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="win"
+            app:layout_constraintBottom_toTopOf="@+id/mark_config"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/winRange" />
+
+        <!--suppress AndroidUnknownAttribute -->
+        <RadioGroup
+            android:id="@+id/mark_config"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onCheckedChanged="@{(v, id) ->  initializer.changeMark(id) }"
+            android:orientation="horizontal"
+            android:weightSum="20"
+            app:layout_constraintBottom_toTopOf="@+id/find_game"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/rowlnum">
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <RadioButton
+                android:id="@+id/crossMark"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:checked="true"
+                android:drawableStart="@drawable/ic_cross" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2" />
+
+            <RadioButton
+                android:id="@+id/anyMark"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="6"
+                android:drawableStart="@drawable/cross_nought" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2" />
+
+            <RadioButton
+                android:id="@+id/noughtMark"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:drawableStart="@drawable/ic_nought" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/find_game"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Найти игру"
+            app:layout_constraintBottom_toTopOf="@+id/game_list"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/mark_config" />
+
+        <ListView
+            android:id="@+id/game_list"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:adapter="@{gamesAdapter}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/find_game"
+            tools:listitem="@layout/game_list_item" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

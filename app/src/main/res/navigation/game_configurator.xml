@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/game_configurator"
+    app:startDestination="@id/myFragment">
+
+    <fragment
+        android:id="@+id/myFragment"
+        android:name="com.example.game.tic_tac_toe.MainFragment"
+        android:label="MyFragment"
+        tools:layout="@layout/game_choice">
+        <action
+            android:id="@+id/action_myFragment_to_networkGame"
+            app:destination="@id/networkGame" />
+        <action
+            android:id="@+id/action_myFragment_to_gameSetup"
+            app:destination="@id/gameSetup" />
+    </fragment>
+    <fragment
+        android:id="@+id/gameSetup"
+        android:name="com.example.game.tic_tac_toe.gamesetup.GameSetup"
+        android:label="GameSetup"
+        tools:layout="@layout/game_setup_full">
+        <action
+            android:id="@+id/action_gameSetup_to_gameFragment"
+            app:destination="@id/gameFragment"
+            app:popUpTo="@+id/myFragment" />
+        <action
+            android:id="@+id/action_gameSetup_to_myFragment"
+            app:destination="@id/myFragment"
+            app:popUpTo="@id/myFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/networkGame"
+        android:name="com.example.game.tic_tac_toe.NetworkGame"
+        android:label="NetworkGame"
+        tools:layout="@layout/network_game">
+        <action
+            android:id="@+id/action_networkGame_to_gameSetup"
+            app:destination="@id/gameSetup" />
+        <action
+            android:id="@+id/action_networkGame_to_gameList"
+            app:destination="@+id/gamesList" />
+        <action
+            android:id="@+id/action_networkGame_to_deviceChooser"
+            app:destination="@id/deviceChooser" />
+    </fragment>
+    <fragment
+        android:id="@+id/gameFragment"
+        android:name="com.example.game.tic_tac_toe.game.GameFragment"
+        android:label="GameFragment">
+        <action
+            android:id="@+id/action_gameFragment_to_myFragment"
+            app:destination="@id/myFragment"
+            app:popUpTo="@+id/action_gameFragment_to_myFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_gameFragment_to_gameResultDialog"
+            app:destination="@id/gameResultDialog" />
+        <action
+            android:id="@+id/action_gameFragment_to_gameErrorDialog"
+            app:destination="@id/gameErrorDialog" />
+        <action
+            android:id="@+id/action_gameFragment_to_gameExitDialog"
+            app:destination="@id/gameExitDialog" />
+    </fragment>
+    <fragment
+        android:id="@+id/gamesList"
+        android:name="com.example.game.tic_tac_toe.NetworkGamesList"
+        android:label="GamesList"
+        tools:layout="@layout/game_list">
+        <action
+            android:id="@+id/action_gamesList_to_gameFragment"
+            app:destination="@id/gameFragment"
+            app:popUpTo="@+id/myFragment" />
+        <action
+            android:id="@+id/action_gamesList_to_networkGame"
+            app:destination="@id/networkGame"
+            app:popUpTo="@+id/networkGame" />
+    </fragment>
+    <dialog
+        android:id="@+id/gameResultDialog"
+        android:name="com.example.game.tic_tac_toe.dialogs.GameResultDialog"
+        android:label="GameResultDialog">
+        <action
+            android:id="@+id/action_gameResultDialog_to_myFragment"
+            app:destination="@id/myFragment"
+            app:popUpTo="@id/myFragment" />
+        <argument
+            android:name="gameResult"
+            app:argType="string" />
+        <argument
+            android:name="playerX"
+            app:argType="float" />
+        <argument
+            android:name="playerO"
+            app:argType="float" />
+    </dialog>
+    <dialog
+        android:id="@+id/gameErrorDialog"
+        android:name="com.example.game.tic_tac_toe.dialogs.GameErrorDialog"
+        android:label="GameErrorDialog">
+        <action
+            android:id="@+id/action_gameErrorDialog_to_myFragment"
+            app:destination="@id/myFragment"
+            app:popUpTo="@+id/myFragment" />
+        <argument
+            android:name="cause"
+            app:argType="string" />
+    </dialog>
+    <dialog
+        android:id="@+id/gameExitDialog"
+        android:name="com.example.game.tic_tac_toe.dialogs.GameExitDialog"
+        android:label="GameExitDialog">
+        <action
+            android:id="@+id/action_gameExitDialog_to_myFragment"
+            app:destination="@id/myFragment"
+            app:popUpTo="@+id/myFragment" />
+    </dialog>
+    <dialog
+        android:id="@+id/deviceChooser"
+        android:name="com.example.game.tic_tac_toe.DeviceChooser"
+        android:label="DeviceChooser"
+        tools:layout="@layout/bt_dialog">>
+        <action
+            android:id="@+id/action_deviceChooser_to_gameFragment"
+            app:destination="@id/gameFragment" />
+        <action
+            android:id="@+id/action_deviceChooser_to_networkGame"
+            app:destination="@id/networkGame"
+            app:popUpTo="@id/networkGame" />
+    </dialog>
+</navigation>

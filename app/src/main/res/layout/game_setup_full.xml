@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?android:attr/windowBackground">
+
+    <fragment
+        android:id="@+id/sizeSetup"
+        class="com.example.game.tic_tac_toe.gamesetup.GameSetupSizer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:layout="@layout/game_setup_step_sizer" />
+
+    <fragment
+        android:id="@+id/playersSetup"
+        class="com.example.game.tic_tac_toe.gamesetup.GameSetupPlayers"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:layout="@layout/game_setup_step_players" />
+
+
+</LinearLayout>

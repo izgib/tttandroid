@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Tic-Tac-Toe</string>
+    <string name="humanvsrobot">Игра против робота</string>
+    <string name="humanvshuman">2 игрока</string>
+    <string name="btgame">игра по блютузу</string>
+    <string name="player1">Игрок X</string>
+    <string name="player2">Игрок O</string>
+    <string name="rows_num">количество строк: %d</string>
+    <string name="cols_num">количество столбцов: %d</string>
+    <string name="rowl_num">длина линии: %d</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

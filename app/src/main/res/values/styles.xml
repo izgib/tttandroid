@@ -1,0 +1,48 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="CustomStepperLayoutThemeSample">
+        <item name="ms_stepperType">tabs</item>
+        <item name="ms_showBottomNavigation">false</item>
+    </style>
+
+    <style name="GameSettingsRangeBar" parent="AppTheme">
+        <item name="mrb_barWeight">2dp</item>
+        <item name="mrb_connectingLineWeight">4dp</item>
+        <item name="mrb_leftSelectorColor">#FFB300</item>
+        <item name="mrb_pinColor">#6c3f6a</item>
+        <item name="mrb_pinMaxFont">15sp</item>
+        <item name="mrb_pinMinFont">12sp</item>
+        <item name="mrb_pinRadius">14dp</item>
+        <item name="mrb_pinTextColor">@color/ms_white</item>
+        <item name="mrb_rangeBar">true</item>
+        <item name="mrb_rangeBarPaddingBottom">30dp</item>
+        <item name="mrb_rangeBar_rounded">true</item>
+        <item name="mrb_rightSelectorColor">#FFB300</item>
+        <item name="mrb_selectorBoundaryColor">?colorPrimary</item>
+        <item name="mrb_selectorBoundarySize">2dp</item>
+        <item name="mrb_selectorSize">6dp</item>
+        <item name="mrb_temporaryPins">true</item>
+        <item name="mrb_tickDefaultColor">@color/ms_selectedColor</item>
+        <item name="mrb_tickDefaultLabel">label</item>
+        <item name="mrb_tickHeight">4dp</item>
+        <item name="mrb_tickInterval">1</item>
+        <item name="mrb_tickLabelColor">@color/ms_selectedColor</item>
+        <item name="mrb_tickLabelSelectedColor">?colorAccent</item>
+        <item name="mrb_tickLabelSize">4sp</item>
+    </style>
+
+
+</resources>

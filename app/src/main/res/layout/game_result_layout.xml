@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="result"
+            type="String" />
+
+        <variable
+            name="playerX"
+            type="Float" />
+
+        <variable
+            name="playerO"
+            type="Float" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/ms_white"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="@{result}"
+            android:textAlignment="center"
+            android:textSize="32sp"
+            tools:text="Игрок X выиграл" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/imageView"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:alpha="@{safeUnbox(playerX)}"
+                app:srcCompat="@drawable/ic_cross" />
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:alpha="@{safeUnbox(playerO)}"
+                app:srcCompat="@drawable/ic_nought" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</layout>
+
