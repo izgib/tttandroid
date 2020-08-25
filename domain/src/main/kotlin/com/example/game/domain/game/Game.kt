@@ -3,12 +3,6 @@ package com.example.game.domain.game
 import kotlin.math.min
 
 class Game(rows: Int, cols: Int, win: Int) : GameController(rows, cols, win) {
-    private val marks: Array<Mark> = arrayOf(Mark.Cross, Mark.Nought)
-
-    fun moveTo(move: Coord) {
-        gameField[move.i][move.j] = marks[curPlayer()]
-    }
-
     fun gameState(move: Coord): GameState {
         val winLine = gameWon(marks[curPlayer()], move)
         if (winLine != null) {
@@ -21,63 +15,37 @@ class Game(rows: Int, cols: Int, win: Int) : GameController(rows, cols, win) {
         return Continues
     }
 
-    private fun lineIterator(start: Coord, i_step: Int, j_step: Int, length: Int): Iterator<Coord> = iterator {
-        var i = start.i
-        var j = start.j
-        repeat(length) {
-            yield(Coord(i, j))
-            i += i_step
-            j += j_step
-        }
-    }
+    internal fun gameWon(mark: Mark, move: Coord): EndWinLine? {
+        val leftStep = min(move.col, win - 1)
+        val rightStep = min(cols - 1 - move.col, win - 1)
+        val topStep = min(move.row, win - 1)
+        val bottomStep = min(rows - 1 - move.row, win - 1)
 
-    fun getMarks(): MarkLists {
-        val crosses = ArrayList<Coord>(turn / 2 + curPlayer())
-        val noughts = ArrayList<Coord>(turn / 2)
-        gameField.forEachIndexed { rowInd, row ->
-            row.forEachIndexed { colInd, mark ->
-                when (mark) {
-                    Mark.Cross -> crosses.add(Coord(rowInd, colInd))
-                    Mark.Nought -> noughts.add(Coord(rowInd, colInd))
-                    Mark.Empty -> {
-                    }
-                }
-            }
-        }
-        return MarkLists(crosses, noughts)
-    }
-
-    private fun gameWon(mark: Mark, move: Coord): EndWinLine? {
-        val leftStep = min(move.j, win - 1)
-        val rightStep = min(cols - 1 - move.j, win - 1)
-        val topStep = min(move.i, win - 1)
-        val bottomStep = min(rows - 1 - move.i, win - 1)
-
-        val lines: Array<LineIteratorParams> = arrayOf(
+        val lines: Array<LineParams> = arrayOf(
                 // horizontal
-                LineIteratorParams(
-                        Coord(move.i, move.j - leftStep), 0, 1, rightStep + 1 + leftStep),
+                LineParams(
+                        Coord(move.row, move.col - leftStep), 0, 1, rightStep + 1 + leftStep),
                 // vertical
-                LineIteratorParams(Coord(move.i - topStep, move.j), 1, 0, topStep + 1 + bottomStep),
+                LineParams(Coord(move.row - topStep, move.col), 1, 0, topStep + 1 + bottomStep),
                 // main diagonal
-                LineIteratorParams(
-                        Coord(move.i - min(leftStep, topStep), move.j - min(leftStep, topStep)),
+                LineParams(
+                        Coord(move.row - min(leftStep, topStep), move.col - min(leftStep, topStep)),
                         1,
                         1,
                         min(leftStep, topStep) + 1 + min(rightStep, bottomStep)),
                 // anti diagonal
-                LineIteratorParams(Coord(move.i + min(leftStep, bottomStep), move.j - min(leftStep, bottomStep)),
+                LineParams(Coord(move.row + min(leftStep, bottomStep), move.col - min(leftStep, bottomStep)),
                         -1,
                         1,
                         min(leftStep, bottomStep) + 1 + min(rightStep, topStep))
         )
 
-        lines.forEach {
-            if (it.length >= win) {
+        lines.forEach { line ->
+            if (line.length >= win) {
                 var l = 0
                 var start: Coord? = null
-                for (coord in lineIterator(it.start, it.i_step, it.j_step, it.length)) {
-                    if (gameField[coord.i][coord.j] == mark) {
+                for (coord in line.iterator()) {
+                    if (gameField[coord.row][coord.col] == mark) {
                         if (start == null) {
                             start = coord
                         }
@@ -97,16 +65,22 @@ class Game(rows: Int, cols: Int, win: Int) : GameController(rows, cols, win) {
 }
 
 interface ICoord {
-    val i: Int
-    val j: Int
+    val row: Int
+    val col: Int
 }
 
-data class Coord(override val i: Int, override val j: Int) : ICoord
+data class Coord(override val row: Int, override val col: Int) : ICoord
 data class MarkLists(val crosses: List<Coord>, val noughts: List<Coord>)
 enum class Mark(val mark: Byte) {
     Cross(0),
     Nought(1),
     Empty(2)
+}
+
+operator fun Mark.not() = when (this) {
+    Mark.Cross -> Mark.Nought
+    Mark.Nought -> Mark.Cross
+    Mark.Empty -> Mark.Empty
 }
 
 sealed class GameState
@@ -115,7 +89,17 @@ object Tie : GameState()
 data class Win(val line: EndWinLine) : GameState()
 
 
-data class LineIteratorParams(val start: Coord, var i_step: Int, var j_step: Int, var length: Int)
+data class LineParams(val start: Coord, val i_step: Int, var j_step: Int, var length: Int)
+
+internal fun LineParams.iterator(): Iterator<Coord> = iterator {
+    var i = start.row
+    var j = start.col
+    repeat(length) {
+        yield(Coord(i, j))
+        i += i_step
+        j += j_step
+    }
+}
 
 class GameRules {
     companion object {
@@ -126,7 +110,7 @@ class GameRules {
         const val COLS_MAX = 15
 
         const val WIN_MIN = 3
-        const val WIN_MAX = 7
+        const val WIN_MAX = 8
     }
 }
 
