@@ -1,88 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:orientation="vertical"
-        android:padding="16dp">
+<merge android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
 
-        <Button
-            android:id="@+id/game_create"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:onClick="@{() -> handler.createGame(gameSetup.gameType)}"
-            android:text="Создать игру" />
+    <Button
+        android:id="@+id/game_create"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Создать игру"
+        app:layout_constraintBottom_toTopOf="@+id/onTop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/onTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="game_create"
+        app:layout_constraintTop_toBottomOf="@id/game_create"
+        app:layout_constraintBottom_toTopOf="@id/player1" />
+
+    <TextView
+        android:id="@+id/player1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="player"
+        app:layout_constraintBottom_toTopOf="@id/player2"
+        app:layout_constraintEnd_toStartOf="@+id/playerX"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/onTop"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <ImageView
+        android:id="@+id/playerX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="TODO"
+        app:layout_constraintBottom_toBottomOf="@+id/player1"
+        app:layout_constraintEnd_toStartOf="@+id/playerXSpinner"
+        app:layout_constraintStart_toEndOf="@+id/player1"
+        app:layout_constraintTop_toTopOf="@+id/player1"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/ic_cross" />
+
+    <Spinner
+        android:id="@+id/playerXSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/playerX"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/playerX"
+        app:layout_constraintTop_toTopOf="@+id/playerX"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/player2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="player"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/PlayerO"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/player1" />
+
+    <ImageView
+        android:id="@+id/PlayerO"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="TODO"
+        app:layout_constraintBottom_toBottomOf="@+id/player2"
+        app:layout_constraintEnd_toStartOf="@+id/playerOSpinner"
+        app:layout_constraintStart_toEndOf="@+id/player2"
+        app:layout_constraintTop_toTopOf="@+id/player2"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/ic_nought" />
+
+    <Spinner
+        android:id="@+id/playerOSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/PlayerO"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/PlayerO"
+        app:layout_constraintTop_toTopOf="@+id/PlayerO"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="player1,player2" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/onBot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="playerOSpinner,PlayerO,player2" />
 
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
+    <ImageButton
+        android:id="@+id/reshuffle"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@null"
+        android:contentDescription="TODO"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toTopOf="@id/onBot"
+        app:layout_constraintEnd_toStartOf="@+id/barrier"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintTop_toBottomOf="@id/onTop"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/ic_loop_24dp" />
+    <!--layout_constrainedHeight="true"-->
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="TODO"
-                app:srcCompat="@drawable/ic_cross" />
+</merge>
 
-            <!--suppress AndroidUnknownAttribute -->
-            <Spinner
-                android:id="@+id/opp1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:adapter="@{spinAdapter}"
-                android:selectedItemPosition="@={gameSetup.player1Pos}" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="player" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="TODO"
-                app:srcCompat="@drawable/ic_nought" />
-
-            <!--suppress AndroidUnknownAttribute -->
-            <Spinner
-                android:id="@+id/opp2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:adapter="@{spinAdapter}"
-                android:selectedItemPosition="@={gameSetup.player2Pos}" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="player" />
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <data>
-
-        <variable
-            name="handler"
-            type="com.example.game.tic_tac_toe.gamesetup.GameCreator" />
-
-        <variable
-            name="gameSetup"
-            type="com.example.game.tic_tac_toe.viewmodels.GameSetupViewModel" />
-
-        <variable
-            name="spinAdapter"
-            type="com.example.game.tic_tac_toe.gamesetup.OpponentChoose" />
-    </data>
-
-</layout>

@@ -1,174 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:orientation="vertical">
 
-        <LinearLayout
+        <SeekBar
+            android:id="@+id/rows"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:max="12" />
+
+        <TextView
+            android:id="@+id/rowsnum"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:orientation="vertical">
-
-            <SeekBar
-                android:id="@+id/rows"
-                style="@style/Widget.AppCompat.SeekBar.Discrete"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max='@{Rules.ROWS_MAX - Rules.ROWS_MIN}'
-                android:progress="@={SizerConverter.get(setupViewModel.rows)}"
-                tools:max="12" />
-
-            <TextView
-                android:id="@+id/rowsnum"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@{@string/rows_num(setupViewModel.rows)}"
-                tools:text="@string/rows_num" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:focusable="false"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <SeekBar
-                android:id="@+id/cols"
-                style="@style/Widget.AppCompat.SeekBar.Discrete"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max='@{Rules.COLS_MAX - Rules.COLS_MIN}'
-                android:progress="@={SizerConverter.get(setupViewModel.cols)}"
-                tools:max="12" />
-
-            <TextView
-                android:id="@+id/colsnum"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@{@string/cols_num(setupViewModel.cols)}"
-                tools:text="@string/cols_num" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:focusable="false"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <SeekBar
-                android:id="@+id/rowl"
-                style="@style/Widget.AppCompat.SeekBar.Discrete"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="@{setupViewModel.winMax}"
-                android:progress="@={SizerConverter.get(setupViewModel.win)}"
-                app:mrb_tickInterval="0.5"
-                tools:max="12" />
-
-            <TextView
-                android:id="@+id/rowlnum"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@{@string/rowl_num(setupViewModel.win)}"
-                tools:text="@string/rowl_num" />
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/game_create"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:onClick="@{() -> handler.createGame(gameSetup.gameType)}"
-            android:text="Создать игру" />
-
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="TODO"
-                app:srcCompat="@drawable/ic_cross" />
-
-            <!--suppress AndroidUnknownAttribute -->
-            <Spinner
-                android:id="@+id/opp1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:adapter="@{spinAdapter}"
-                android:selectedItemPosition="@={gameSetup.player1Pos}" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="player" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="TODO"
-                app:srcCompat="@drawable/ic_nought" />
-
-            <!--suppress AndroidUnknownAttribute -->
-            <Spinner
-                android:id="@+id/opp2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:adapter="@{spinAdapter}"
-                android:selectedItemPosition="@={gameSetup.player2Pos}" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="player" />
-        </LinearLayout>
+            tools:text="@string/rows_num" />
 
     </LinearLayout>
 
-    <data>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        android:gravity="center"
+        android:orientation="vertical">
 
-        <import type="com.example.game.tic_tac_toe.gamesetup.SizerConverter" />
+        <SeekBar
+            android:id="@+id/cols"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:max="12" />
 
-        <import
-            type="com.example.game.domain.game.GameRules"
-            alias="Rules" />
+        <TextView
+            android:id="@+id/colsnum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            tools:text="@string/cols_num" />
+    </LinearLayout>
 
-        <variable
-            name="setupViewModel"
-            type="com.example.game.tic_tac_toe.viewmodels.GameSetupViewModel" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        android:gravity="center"
+        android:orientation="vertical">
 
-        <variable
-            name="handler"
-            type="com.example.game.tic_tac_toe.gamesetup.GameCreator" />
+        <SeekBar
+            android:id="@+id/win"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:mrb_tickInterval="0.5"
+            tools:max="12" />
 
-        <variable
-            name="gameSetup"
-            type="com.example.game.tic_tac_toe.viewmodels.GameSetupViewModel" />
+        <TextView
+            android:id="@+id/winnum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            tools:text="@string/rowl_num" />
+    </LinearLayout>
 
-        <variable
-            name="spinAdapter"
-            type="com.example.game.tic_tac_toe.gamesetup.OpponentChoose" />
-    </data>
+    <Button
+        android:id="@+id/game_create"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Создать игру" />
 
 
-</layout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="TODO"
+            app:srcCompat="@drawable/ic_cross" />
+
+        <Spinner
+            android:id="@+id/playerXSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="player" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="TODO"
+            app:srcCompat="@drawable/ic_nought" />
+
+        <Spinner
+            android:id="@+id/playerOSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="player" />
+    </LinearLayout>
+
+</LinearLayout>
+

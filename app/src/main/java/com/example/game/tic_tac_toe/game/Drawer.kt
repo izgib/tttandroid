@@ -8,7 +8,4 @@ interface Drawer {
     fun putO(i: Int, j: Int)
     fun putWLine(i1: Int, j1: Int, i2: Int, j2: Int, player: Mark)
     fun updateCanvas()
-    var SQUARE_SIZE: Int
-    var FIELD_OFFSET_x: Float
-    var FIELD_OFFSET_y: Float
 }

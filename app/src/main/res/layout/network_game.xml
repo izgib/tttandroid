@@ -1,47 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <Button
+        android:id="@+id/net_create_game"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?android:attr/windowBackground"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Создать игру" />
 
-        <Button
-            android:id="@+id/net_create_game"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:onClick="@{(view) -> setupInitializer.startInitialization(view, setup)}"
-            android:text="Создать игру" />
+    <Button
+        android:id="@+id/net_find_enemy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Найти игру" />
+</merge>
 
-        <Button
-            android:id="@+id/net_find_enemy"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:onClick="@{(view) -> gameFinder.findGame(view, setup, sensors)}"
-            android:text="Найти игру" />
-    </LinearLayout>
-
-    <data>
-
-        <variable
-            name="setupInitializer"
-            type="com.example.game.tic_tac_toe.GameSetupInitializer" />
-
-        <variable
-            name="gameFinder"
-            type="com.example.game.tic_tac_toe.GameFindHandler" />
-
-        <variable
-            name="setup"
-            type="com.example.game.tic_tac_toe.viewmodels.GameSetupViewModel" />
-
-        <variable
-            name="sensors"
-            type="com.example.game.tic_tac_toe.viewmodels.SensorsViewModel" />
-    </data>
-</layout>

@@ -3,33 +3,30 @@ package com.example.game.tic_tac_toe.dialogs
 import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.app.DialogFragment
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.navGraphViewModels
-import com.example.game.tic_tac_toe.R
-import com.example.game.tic_tac_toe.viewmodels.DualResponse
-import com.example.game.tic_tac_toe.viewmodels.NavigationViewModel
+import com.example.game.tic_tac_toe.navigation.base.dialogs.BaseDialogFragment
+import com.example.game.tic_tac_toe.navigation.screens.dialogs.DualResponse
 
-class GameExitDialog : DialogFragment() {
-    private val navigationModel: NavigationViewModel by navGraphViewModels(R.id.game_configurator)
-
-    companion object {
-        const val G_EXIT_D_TAG = "GameExitDialog"
-    }
+class GameExitDialog : BaseDialogFragment() {
+    private val handler by lazy { getResultHandler<DualResponse>() }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val builder = AlertDialog.Builder(context!!)
+        val builder = AlertDialog.Builder(requireContext())
         builder.setMessage("Вы действительно хотите выйти?")
                 .setPositiveButton("Да") { _, _ ->
-                    navigationModel.result(DualResponse.Yes)
-                    findNavController().navigate(R.id.action_gameExitDialog_to_myFragment)
+                    handler.result = DualResponse.Yes
                 }
                 .setNegativeButton("Нет") { _, _ ->
-                    navigationModel.result(DualResponse.No)
-                    dismiss()
+                    handler.result = DualResponse.No
                 }
-                .setCancelable(false)
 
         return builder.create()
+    }
+
+    companion object {
+        const val TAG = "GameExitDialog"
+
+        fun newInstance(cancelable: Boolean = false) = GameExitDialog().apply {
+            isCancelable = cancelable
+        }
     }
 }

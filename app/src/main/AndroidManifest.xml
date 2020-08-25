@@ -18,9 +18,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/game_launcher"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:name=".GameApplication">
-
+        android:theme="@style/AppTheme">
         <!--android:configChanges="screenLayout|screenSize"-->
         <activity
             android:name=".MainActivity"

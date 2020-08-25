@@ -1,57 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <LinearLayout xmlns:tools="http://schemas.android.com/tools"
-        style="@style/AppTheme.NoActionBar"
+<merge xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/AppTheme.NoActionBar"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <Button
+        android:id="@+id/locgame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context=".MainActivity">
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Локальная игра" />
 
-        <Button
-            android:id="@+id/locgame"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:onClick="@{(view) -> typeChooser.chooseType(view, GameType.Local, setup, sensors)}"
-            android:text="Локальная игра" />
+    <Button
+        android:id="@+id/btgame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Игра по блютузу" />
 
-        <Button
-            android:id="@+id/btgame"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:enabled="@{sensors.haveBluetooth()}"
-            android:gravity="center"
-            android:onClick="@{(view) -> typeChooser.chooseType(view, GameType.Bluetooth, setup, sensors)}"
-            android:text="Игра по блютузу" />
+    <Button
+        android:id="@+id/netgame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Сетевая игра" />
 
-        <Button
-            android:id="@+id/netgame"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:onClick="@{(view) -> typeChooser.chooseType(view, GameType.Network, setup, sensors)}"
-            android:text="Сетевая игра" />
-
-    </LinearLayout>
-
-    <data>
-
-        <import type="com.example.game.controllers.GameType" />
-
-        <variable
-            name="typeChooser"
-            type="com.example.game.tic_tac_toe.SetupGameType" />
-
-        <variable
-            name="setup"
-            type="com.example.game.tic_tac_toe.viewmodels.GameSetupViewModel" />
-
-        <variable
-            name="sensors"
-            type="com.example.game.tic_tac_toe.viewmodels.SensorsViewModel" />
-    </data>
-</layout>
+</merge>

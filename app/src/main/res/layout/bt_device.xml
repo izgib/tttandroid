@@ -1,31 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <data>
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <variable
-            name="device"
-            type="android.bluetooth.BluetoothDevice" />
-    </data>
-
-    <LinearLayout
+    <TextView
+        android:id="@+id/device_name"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        tools:text="bluetooth device" />
 
-        <TextView
-            android:id="@+id/device_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{device.name}" />
+    <TextView
+        android:id="@+id/device_mac_address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="00:11:22:33:FF:EE" />
 
-        <TextView
-            android:id="@+id/device_mac_address"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{device.address}" />
+</LinearLayout>
 
-    </LinearLayout>
-
-</layout>

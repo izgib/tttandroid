@@ -1,86 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
 
-    <data>
-
-        <variable
-            name="listItem"
-            type="com.example.game.controllers.GameItem" />
-    </data>
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/game_ID"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:background="@android:color/holo_red_light"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            tools:text="Lol" />
 
-            <TextView
-                android:id="@+id/game_ID"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@android:color/holo_red_light"
-                android:text="@{Integer.toString(listItem.ID)}"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                tools:text="Lol" />
-
-            <ImageView
-                android:id="@+id/game_mark"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:contentDescription="Mark"
-                app:gameMark="@{listItem.mark}"
-                android:layout_weight="4" />
-
-            <TextView
-                android:id="@+id/game_rows"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text='@{String.format("rows: %d", listItem.rows)}'
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_weight="3"
-                tools:text="rows: 3" />
-
-
-            <TextView
-                android:id="@+id/game_cols"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text='@{String.format("cols: %d", listItem.cols)}'
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_weight="3"
-                tools:text="cols: 3" />
-
-            <TextView
-                android:id="@+id/game_win"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text='@{String.format("win: %d", listItem.win)}'
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_weight="3"
-                tools:text="win: 3" />
-        </LinearLayout>
-
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
+        <ImageView
+            android:id="@+id/game_mark"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:visibility="gone"
-            tools:visibility="visible"
-            tools:indeterminate="false" />
+            android:contentDescription="Mark"
+            android:layout_weight="4" />
 
+        <TextView
+            android:id="@+id/game_rows"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_weight="3"
+            tools:text="rows: 3" />
+
+
+        <TextView
+            android:id="@+id/game_cols"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_weight="3"
+            tools:text="cols: 3" />
+
+        <TextView
+            android:id="@+id/game_win"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_weight="3"
+            tools:text="win: 3" />
     </LinearLayout>
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone"
+        tools:visibility="visible"
+        tools:indeterminate="false" />
 
-</layout>
+</LinearLayout>
+
+

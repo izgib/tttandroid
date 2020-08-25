@@ -1,1 +1,1 @@
--keep class org.koin.**
+

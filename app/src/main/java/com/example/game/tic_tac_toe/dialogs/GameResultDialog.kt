@@ -7,27 +7,57 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
-import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
-import com.example.game.tic_tac_toe.R
+import com.example.game.domain.game.Mark
 import com.example.game.tic_tac_toe.databinding.GameResultLayoutBinding
+import com.example.game.tic_tac_toe.navigation.base.backstack
 
 const val GRD_TAG = "GameResultDialog"
 
 class GameResultDialog : DialogFragment() {
-    private val args: GameResultDialogArgs by navArgs()
     override fun onCancel(dialog: DialogInterface) {
         Log.d(GRD_TAG, "dialog canceled")
-        findNavController().navigate(R.id.action_gameResultDialog_to_myFragment)
+        backstack.jumpToRoot()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val binding = GameResultLayoutBinding.inflate(LayoutInflater.from(context))
+    private fun getWinner(): Mark = requireArguments().getSerializable(WINNER_KEY) as Mark
 
-        binding.result = args.gameResult
-        binding.playerX = args.playerX
-        binding.playerO = args.playerO
-        return binding.root
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        return GameResultLayoutBinding.inflate(LayoutInflater.from(context)).apply {
+            when (getWinner()) {
+                Mark.Cross -> {
+                    result.text = "Выиграл игрок X"
+                    playerX.alpha = winnerAlpha
+                    playerO.alpha = loserAlpha
+                }
+                Mark.Nought -> {
+                    result.text = "Выиграл игрок O"
+                    playerX.alpha = loserAlpha
+                    playerO.alpha = winnerAlpha
+                }
+                Mark.Empty -> {
+                    result.text = "Ничья"
+                    playerX.alpha = tieAlpha
+                    playerO.alpha = tieAlpha
+                }
+            }
+        }.root
+
+
+    }
+
+    companion object {
+        private val WINNER_KEY = "winner"
+
+        private const val winnerAlpha = 1f
+        private const val loserAlpha = .1f
+        private const val tieAlpha = .5f
+
+        fun newInstance(winner: Mark) = GameResultDialog().apply {
+            arguments = (arguments ?: Bundle()).also { bundle ->
+                bundle.putSerializable(WINNER_KEY, winner)
+            }
+        }
+
     }
 }
 

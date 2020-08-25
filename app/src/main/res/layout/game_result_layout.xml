@@ -1,60 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
-    <data>
-
-        <variable
-            name="result"
-            type="String" />
-
-        <variable
-            name="playerX"
-            type="Float" />
-
-        <variable
-            name="playerO"
-            type="Float" />
-    </data>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/result"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:background="@color/ms_white"
-        android:orientation="vertical">
+        android:textAlignment="center"
+        android:textSize="32sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Игрок X выиграл" />
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="300dp"
-            android:layout_height="wrap_content"
-            android:text="@{result}"
-            android:textAlignment="center"
-            android:textSize="32sp"
-            tools:text="Игрок X выиграл" />
+    <ImageView
+        android:id="@+id/playerX"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/playerO"
+        app:layout_constraintTop_toBottomOf="@id/result"
+        app:srcCompat="@drawable/ic_cross" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+    <ImageView
+        android:id="@+id/playerO"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintLeft_toRightOf="@+id/playerX"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/result"
+        app:srcCompat="@drawable/ic_nought" />
 
-            <ImageView
-                android:id="@+id/imageView"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:alpha="@{safeUnbox(playerX)}"
-                app:srcCompat="@drawable/ic_cross" />
-
-            <ImageView
-                android:id="@+id/imageView2"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:alpha="@{safeUnbox(playerO)}"
-                app:srcCompat="@drawable/ic_nought" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-</layout>
+</androidx.constraintlayout.widget.ConstraintLayout>
 

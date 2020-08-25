@@ -1,102 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
         android:orientation="vertical">
 
-        <LinearLayout
+        <SeekBar
+            android:id="@+id/rows"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/rowsnum"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
-
-            <SeekBar
-                android:id="@+id/rows"
-                style="@style/Widget.AppCompat.SeekBar.Discrete"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max='@{Rules.ROWS_MAX - Rules.ROWS_MIN}'
-                android:progress="@={SizerConverter.get(setupViewModel.rows)}" />
-
-            <TextView
-                android:id="@+id/rowsnum"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@{@string/rows_num(setupViewModel.rows)}"
-                tools:text="@string/rows_num" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:focusable="false"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <SeekBar
-                android:id="@+id/cols"
-                style="@style/Widget.AppCompat.SeekBar.Discrete"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max='@{Rules.COLS_MAX - Rules.COLS_MIN}'
-                android:progress="@={SizerConverter.get(setupViewModel.cols)}" />
-
-            <TextView
-                android:id="@+id/colsnum"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@{@string/cols_num(setupViewModel.cols)}"
-                tools:text="@string/cols_num" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:focusable="false"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <SeekBar
-                android:id="@+id/rowl"
-                style="@style/Widget.AppCompat.SeekBar.Discrete"
-                app:mrb_tickInterval="0.5"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:max="@{setupViewModel.winMax}"
-                android:progress="@={SizerConverter.get(setupViewModel.win)}" />
-
-            <TextView
-                android:id="@+id/rowlnum"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@{@string/rowl_num(setupViewModel.win)}"
-                tools:text="@string/rowl_num" />
-        </LinearLayout>
+            tools:text="@string/rows_num" />
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:focusable="false"
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <data>
+        <SeekBar
+            android:id="@+id/cols"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
-        <import type="com.example.game.tic_tac_toe.gamesetup.SizerConverter" />
+        <TextView
+            android:id="@+id/colsnum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            tools:text="@string/cols_num" />
+    </LinearLayout>
 
-        <import
-            type="com.example.game.domain.game.GameRules"
-            alias="Rules" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:focusable="false"
+        android:gravity="center"
+        android:orientation="vertical">
 
-        <variable
-            name="setupViewModel"
-            type="com.example.game.tic_tac_toe.viewmodels.GameSetupViewModel" />
-    </data>
-</layout>
+        <SeekBar
+            android:id="@+id/win"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/winnum"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            tools:text="@string/rowl_num" />
+    </LinearLayout>
+
+</merge>

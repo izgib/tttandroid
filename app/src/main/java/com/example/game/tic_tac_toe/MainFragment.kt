@@ -4,44 +4,32 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.navigation.findNavController
-import com.example.game.controllers.GameType
-import com.example.game.tic_tac_toe.databinding.GameChoiceBinding
-import com.example.game.tic_tac_toe.viewmodels.GameSetupViewModel
-import com.example.game.tic_tac_toe.viewmodels.SensorsViewModel
-import com.google.android.material.snackbar.Snackbar
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
+import androidx.lifecycle.coroutineScope
+import com.example.game.tic_tac_toe.databinding.RootLinearLayoutBinding
+import com.example.game.tic_tac_toe.navigation.base.BaseFragment
+import com.example.game.tic_tac_toe.navigation.base.lookup
+import com.example.game.tic_tac_toe.navigation.scopes.TypeStorage
+import com.example.game.tic_tac_toe.ui_components.GameTypeComponent
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
-class MainFragment : Fragment() {
-    private val GSViewModel: GameSetupViewModel by sharedViewModel()
-    private val sensors: SensorsViewModel by sharedViewModel()
+class MainFragment : BaseFragment() {
+    private val gameType: TypeStorage by lazy { lookup<TypeStorage>() }
+    private lateinit var container: ViewGroup
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        val binding = GameChoiceBinding.inflate(layoutInflater, container, false)
-        binding.typeChooser = SetupGameType
-        binding.setup = GSViewModel
-        binding.sensors = sensors
-        return binding.root
+        val binding = RootLinearLayoutBinding.inflate(layoutInflater, container, false)
+        this.container = binding.root
+        return this.container
     }
-}
 
-object SetupGameType {
-    fun chooseType(view: View, gameType: GameType, setup: GameSetupViewModel, sensors: SensorsViewModel) {
-        setup.setupGameType(gameType)
-        setup.setupPlayers()
-        val action = when (gameType) {
-            GameType.Local -> R.id.action_myFragment_to_gameSetup
-            GameType.Bluetooth -> R.id.action_myFragment_to_networkGame
-            GameType.Network -> {
-                if (!sensors.networkEnabled()) {
-                    val snack = Snackbar.make(view, "Включите Интернет", Snackbar.LENGTH_LONG)
-                    snack.show()
-                    return
-                }
-                R.id.action_myFragment_to_networkGame
+    @OptIn(InternalCoroutinesApi::class)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        viewLifecycleOwner.lifecycle.coroutineScope.launch {
+            GameTypeComponent(container).getUserInteractionEvents().collect { type ->
+                gameType.gameType = type
             }
         }
-        view.findNavController().navigate(action)
     }
 }
