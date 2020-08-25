@@ -8,19 +8,17 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.os.Build
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.channels.sendBlocking
 
 class NetworkSensor(private val context: Context) {
     private val conManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     @Suppress("DEPRECATION")
     fun networkListener(): ReceiveChannel<Boolean> {
-        val chan = Channel<Boolean>()
+        val chan = Channel<Boolean>(Channel.CONFLATED)
         when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> conManager.registerDefaultNetworkCallback(getConnectivityManagerCallback(chan))
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> lollipopNetworkAvailableRequest(chan)
@@ -46,15 +44,11 @@ class NetworkSensor(private val context: Context) {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             object : ConnectivityManager.NetworkCallback() {
                 override fun onAvailable(network: Network?) {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        connectivityChan.send(true)
-                    }
+                    connectivityChan.sendBlocking(true)
                 }
 
                 override fun onLost(network: Network?) {
-                    GlobalScope.launch(Dispatchers.IO) {
-                        connectivityChan.send(false)
-                    }
+                    connectivityChan.sendBlocking(false)
                 }
             }
         } else {

@@ -1,10 +1,15 @@
 package com.example.game.networking
 
 import android.bluetooth.BluetoothSocket
-import com.example.game.controllers.*
+import com.example.game.controllers.NetworkServer
+import com.example.game.controllers.models.InterruptCause
+import com.example.game.controllers.models.Interruption
+import com.example.game.controllers.models.InterruptionException
 import com.example.game.domain.game.*
 import com.example.game.networking.i9e.*
 import com.google.flatbuffers.FlatBufferBuilder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.nio.ByteBuffer
 
@@ -15,36 +20,39 @@ class BluetoothServerWrapper(
     private val buffer = ByteArray(1024)
     private val bb = ByteBuffer.wrap(buffer)
 
-    override suspend fun getMove(): Result<Coord, Interruption> {
-        gameSocket.inputStream.read(bb.array())
+    override suspend fun getMove(): Coord {
+        withContext(Dispatchers.IO) {
+            gameSocket.inputStream.read(bb.array())
+        }
         val resp = OppResponse.getRootAsOppResponse(bb)
         bb.clear()
-        return when (resp.respType()) {
+        when (resp.respType()) {
             OpponentRespMsg.Move -> {
                 val m = resp.resp(Move()) as Move
-                Success(Coord(m.row().toInt(), m.col().toInt()))
+                return Coord(m.row().toInt(), m.col().toInt())
             }
             OpponentRespMsg.GameEvent -> {
                 val event = resp.resp(GameEvent()) as GameEvent
-                Failure(Interruption(event2Cause(event.type())))
+                throw InterruptionException(event2Cause(event.type()))
             }
             else -> throw IllegalArgumentException("expected game move, got ${OpponentRespMsg.name(resp.respType().toInt())}")
         }
     }
 
-    override suspend fun sendMove(move: Coord): Interruption? {
-        val m = Move.createMove(fbb, move.i.toShort(), move.j.toShort())
+    override suspend fun sendMove(move: Coord) {
+        val m = Move.createMove(fbb, move.row.toShort(), move.col.toShort())
         fbb.finish(BluetoothCreator.createBluetoothCreator(fbb, BluetoothCreatorMsg.Move, m))
 
-        return try {
-            gameSocket.outputStream.write(fbb.sizedByteArray())
-            null
+        try {
+            withContext(Dispatchers.IO) {
+                gameSocket.outputStream.write(fbb.sizedByteArray())
+            }
         } catch (e: IOException) {
-            Interruption(event2Cause(GameEventType.Disonnected))
+            throw InterruptionException(InterruptCause.Disconnected)
         }
     }
 
-    override suspend fun sendState(state: GameState): Interruption? {
+    override suspend fun sendState(state: GameState) {
         val event = when (state) {
             is Continues, Tie -> {
                 GameEvent.startGameEvent(fbb)
@@ -60,8 +68,8 @@ class BluetoothServerWrapper(
                 val winLine = WinLine.createWinLine(
                         fbb,
                         state.line.mark.mark,
-                        Move.createMove(fbb, state.line.start.i.toShort(), state.line.start.j.toShort()),
-                        Move.createMove(fbb, state.line.end.i.toShort(), state.line.end.j.toShort())
+                        Move.createMove(fbb, state.line.start.row.toShort(), state.line.start.col.toShort()),
+                        Move.createMove(fbb, state.line.end.row.toShort(), state.line.end.col.toShort())
                 )
                 GameEvent.createGameEvent(fbb, GameEventType.Win, winLine)
             }
@@ -69,30 +77,32 @@ class BluetoothServerWrapper(
 
         fbb.finish(BluetoothCreator.createBluetoothCreator(fbb, BluetoothCreatorMsg.GameEvent, event))
 
-        return try {
+        try {
             gameSocket.outputStream.run {
-                write(fbb.sizedByteArray())
-                flush()
+                withContext(Dispatchers.IO) {
+                    write(fbb.sizedByteArray())
+                    flush()
+                }
             }
-            null
         } catch (e: IOException) {
-            Interruption(event2Cause(GameEventType.OppDisconnected))
+            throw InterruptionException(InterruptCause.OppLeave)
         }
     }
 
-    override suspend fun sendInterruption(interruption: Interruption): Interruption? {
+    override suspend fun sendInterruption(interruption: Interruption) {
         GameEvent.startGameEvent(fbb)
         GameEvent.addType(fbb, cause2Event(interruption.cause))
         fbb.finish(BluetoothCreator.createBluetoothCreator(fbb, BluetoothCreatorMsg.GameEvent, GameEvent.endGameEvent(fbb)))
-        return try {
-            gameSocket.outputStream.run {
-                write(fbb.sizedByteArray())
-                flush()
+        try {
+            withContext(Dispatchers.IO) {
+                gameSocket.outputStream.run {
+                    write(fbb.sizedByteArray())
+                    flush()
+                }
+                gameSocket.close()
             }
-            gameSocket.close()
-            null
         } catch (e: IOException) {
-            Interruption(event2Cause(GameEventType.OppDisconnected))
+            throw InterruptionException(InterruptCause.OppLeave)
         }
     }
 

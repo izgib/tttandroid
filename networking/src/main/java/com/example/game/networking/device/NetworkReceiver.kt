@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.channels.sendBlocking
 
 class NetworkReceiver(private val connectionChannel: SendChannel<Boolean>) : BroadcastReceiver() {
 
@@ -14,9 +14,7 @@ class NetworkReceiver(private val connectionChannel: SendChannel<Boolean>) : Bro
         val isAirplane = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)
         //intent.getIntExtra(ConnectivityManager.EXTRA_NETWORK_TYPE)
         if (intent.action == BluetoothDevice.ACTION_FOUND) {
-            runBlocking {
-                connectionChannel.send(!isAirplane)
-            }
+            connectionChannel.sendBlocking(!isAirplane)
         }
     }
 }

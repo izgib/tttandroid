@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
 import android.util.Log
 import com.example.game.controllers.*
+import com.example.game.controllers.BluetoothInteractor.Companion.MY_UUID
 import com.example.game.domain.game.Mark
 import com.example.game.networking.i9e.BluetoothCreator
 import com.example.game.networking.i9e.BluetoothCreatorMsg
@@ -20,7 +21,9 @@ import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.nio.ByteBuffer
-import java.util.*
+import kotlin.time.DurationUnit
+import kotlin.time.ExperimentalTime
+import kotlin.time.seconds
 
 class BluetoothInteractorImpl : BluetoothInteractor {
     private val mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
@@ -33,12 +36,11 @@ class BluetoothInteractorImpl : BluetoothInteractor {
 
     private val fbb = FlatBufferBuilder(1024)
 
-
     companion object {
         const val NAME = "TTT"
-        val MY_UUID = UUID.fromString("e67682c9-268c-4de8-ad82-44822952c5ee")!!
-        //in seconds
-        const val ACCEPT_TIMEOUT = 120
+
+        @OptIn(ExperimentalTime::class)
+        val ACCEPT_TIMEOUT = 120.seconds
     }
 
     private suspend fun connectClient2Server(device: BluetoothDevice) = withContext<BluetoothSocket>(Dispatchers.IO) {
@@ -56,12 +58,24 @@ class BluetoothInteractorImpl : BluetoothInteractor {
         }
     }
 
+    private suspend fun serverSocket(): BluetoothServerSocket = withContext(Dispatchers.IO) {
+        return@withContext mBluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID)
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private suspend fun connectServer2Client(serverSocket: BluetoothServerSocket): BluetoothSocket = withContext(Dispatchers.IO) {
+        try {
+            return@withContext serverSocket.accept(ACCEPT_TIMEOUT.toInt(DurationUnit.MILLISECONDS))
+        } catch (e: IOException) {
+            throw e
+        }
+    }
+
     private suspend fun startServer(): BluetoothSocket {
         var counter = 0
         while (true) {
             try {
-                counter++
-                val sSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID)
+                val sSocket = serverSocket()
                 Log.d("BI", "listening started at ${mBluetoothAdapter.name}")
                 val socket = connectServer2Client(sSocket)
                 Log.d("BI", "device ${socket.remoteDevice.name}:${socket.remoteDevice.address} have connected")
@@ -72,17 +86,8 @@ class BluetoothInteractorImpl : BluetoothInteractor {
                 }
                 Log.e("BI", "unable to start server")
                 Log.e("BI", "got error: ${e.message}")
-                e.printStackTrace()
                 throw e
             }
-        }
-    }
-
-    private suspend fun connectServer2Client(serverSocket: BluetoothServerSocket) = withContext<BluetoothSocket>(Dispatchers.IO) {
-        try {
-            return@withContext serverSocket.accept(ACCEPT_TIMEOUT * 1000)
-        } catch (e: IOException) {
-            throw e
         }
     }
 
@@ -101,7 +106,7 @@ class BluetoothInteractorImpl : BluetoothInteractor {
     }
 
     @ExperimentalCoroutinesApi
-    override fun CreateGame(rows: Short, cols: Short, win: Short, mark: Byte): ReceiveChannel<GameInitStatus> {
+    override fun createGame(settings: GameSettings): ReceiveChannel<GameInitStatus> {
         isCreator = true
         return GlobalScope.produce(capacity = Channel.CONFLATED) {
             try {
@@ -113,17 +118,20 @@ class BluetoothInteractorImpl : BluetoothInteractor {
             }
 
             fbb.finish(BluetoothCreator.createBluetoothCreator(fbb, BluetoothCreatorMsg.GameParams,
-                    GameParams.createGameParams(fbb, rows, cols, win, mark)
+                    with(settings) { GameParams.createGameParams(fbb, rows.toShort(), cols.toShort(), win.toShort(), creatorMark.mark) }
             ))
 
             try {
+                gameSocket!!.outputStream
                 gameSocket!!.outputStream.run {
-                    write(fbb.sizedByteArray())
-                    flush()
+                    withContext(Dispatchers.IO) {
+                        write(fbb.sizedByteArray())
+                        flush()
+                    }
                 }
-
-                servWrapper = BluetoothServerWrapper(gameSocket!!)
-                send(GameInitStatus.Connected)
+                val serv = BluetoothServerWrapper(gameSocket!!)
+                servWrapper = serv
+                send(GameInitStatus.Connected(serv))
             } catch (e: IOException) {
                 send(GameInitStatus.Failure)
             }
@@ -131,9 +139,8 @@ class BluetoothInteractorImpl : BluetoothInteractor {
         }
     }
 
-
     @ExperimentalCoroutinesApi
-    override fun JoinGame(device: BluetoothDevice): ReceiveChannel<GameInitStatus> {
+    override fun joinGame(device: BluetoothDevice): ReceiveChannel<GameInitStatus> {
         isCreator = false
         return GlobalScope.produce(Dispatchers.IO, capacity = Channel.CONFLATED) {
             try {
@@ -155,8 +162,9 @@ class BluetoothInteractorImpl : BluetoothInteractor {
                 val params = resp.msg(GameParams()) as GameParams
                 val settings = GameSettings(params.rows().toInt(), params.cols().toInt(), params.win().toInt(), Mark.values()[params.mark().toInt()])
 
-                clientWrapper = BluetoothClientWrapper(gameSocket!!)
-                send(GameInitStatus.OppConnected(settings))
+                val client = BluetoothClientWrapper(gameSocket!!.inputStream, gameSocket!!.outputStream)
+                clientWrapper = client
+                send(GameInitStatus.OppConnected(settings, client))
             } else {
                 throw IllegalArgumentException("expect game params, got: ${BluetoothCreatorMsg.name(resp.msgType().toInt())}")
             }

@@ -2,6 +2,7 @@
 
 package com.example.game.networking.i9e;
 
+import com.google.flatbuffers.BaseVector;
 import com.google.flatbuffers.Constants;
 import com.google.flatbuffers.FlatBufferBuilder;
 import com.google.flatbuffers.Table;
@@ -9,14 +10,12 @@ import com.google.flatbuffers.Table;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import javax.annotation.Nullable;
-
 @SuppressWarnings("unused")
 
 @javax.annotation.Generated(value = "flatc")
 public final class GamesList extends Table {
     public static void ValidateVersion() {
-        Constants.FLATBUFFERS_1_11_1();
+        Constants.FLATBUFFERS_1_12_0();
     }
 
     public static GamesList getRootAsGamesList(ByteBuffer _bb) {
@@ -37,13 +36,11 @@ public final class GamesList extends Table {
         return this;
     }
 
-    public @Nullable
-    ListItem items(int j) {
-        return items(new ListItem(), j);
+    public com.example.game.networking.i9e.ListItem items(int j) {
+        return items(new com.example.game.networking.i9e.ListItem(), j);
     }
 
-    public @Nullable
-    ListItem items(ListItem obj, int j) {
+    public com.example.game.networking.i9e.ListItem items(com.example.game.networking.i9e.ListItem obj, int j) {
         int o = __offset(4);
         return o != 0 ? obj.__assign(__indirect(__vector(o) + j * 4), bb) : null;
     }
@@ -51,6 +48,15 @@ public final class GamesList extends Table {
     public int itemsLength() {
         int o = __offset(4);
         return o != 0 ? __vector_len(o) : 0;
+    }
+
+    public com.example.game.networking.i9e.ListItem.Vector itemsVector() {
+        return itemsVector(new com.example.game.networking.i9e.ListItem.Vector());
+    }
+
+    public com.example.game.networking.i9e.ListItem.Vector itemsVector(com.example.game.networking.i9e.ListItem.Vector obj) {
+        int o = __offset(4);
+        return o != 0 ? obj.__assign(__vector(o), 4, bb) : null;
     }
 
     public static int createGamesList(FlatBufferBuilder builder,
@@ -81,6 +87,21 @@ public final class GamesList extends Table {
     public static int endGamesList(FlatBufferBuilder builder) {
         int o = builder.endTable();
         return o;
+    }
+
+    public static final class Vector extends BaseVector {
+        public Vector __assign(int _vector, int _element_size, ByteBuffer _bb) {
+            __reset(_vector, _element_size, _bb);
+            return this;
+        }
+
+        public GamesList get(int j) {
+            return get(new GamesList(), j);
+        }
+
+        public GamesList get(GamesList obj, int j) {
+            return obj.__assign(__indirect(__element(j), bb), bb);
+        }
     }
 }
 

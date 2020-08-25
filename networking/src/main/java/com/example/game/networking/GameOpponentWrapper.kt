@@ -1,25 +1,29 @@
 package com.example.game.networking
 
-import android.util.Log
-import com.example.game.controllers.*
+import com.example.game.controllers.Created
+import com.example.game.controllers.CreationFailure
+import com.example.game.controllers.GameCreationStatus
+import com.example.game.controllers.NetworkClient
+import com.example.game.controllers.models.*
 import com.example.game.domain.game.*
+import com.example.game.networking.ext.toInterruption
 import com.example.game.networking.i9e.*
 import com.google.flatbuffers.FlatBufferBuilder
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 
 
 class GameOpponentWrapper(
         private val reqChan: Channel<OpponentRequest>,
-        private val respChan: ReceiveChannel<OppResponse>
+        private val respChan: ReceiveChannel<OppResponse>,
+        private val scope: CoroutineScope
 ) : NetworkClient {
-    private val scope = CoroutineScope(Dispatchers.Default)
     private val fbb = FlatBufferBuilder(1024)
     private lateinit var chan: ReceiveChannel<ServerResponse>
 
@@ -51,85 +55,98 @@ class GameOpponentWrapper(
                                         Coord(end.row().toInt(), end.col().toInt())
                                 )))
                             }
-                            else -> Interruption(event2Cause(event.type()))
+                            else -> throw IllegalStateException("wrong event")
                         }
                     }
                     else -> throw IllegalStateException("got unexpected type: ${OpponentRespMsg.name(resp.respType().toInt())}")
                 })
             }
-        } catch (e: io.grpc.StatusException) {
-            send(Interruption(InterruptCause.Disconnected))
+            println("end of iterator")
             close()
+        } catch (t: Throwable) {
+            val status = io.grpc.protobuf.StatusProto.fromThrowable(t)
+            val cause = if (status == null) {
+                println("Throwable: $t")
+                //throw IllegalArgumentException("unexpected behaviour")
+                InterruptCause.Disconnected
+            } else {
+                status.toInterruption().cause
+            }
+            close(InterruptionException(cause))
         }
     }
 
     @ExperimentalCoroutinesApi
-    fun joinGame(gameID: Short): ReceiveChannel<GameCreationStatus> {
+    fun joinGame(gameID: Short): Flow<GameCreationStatus> {
         fbb.finish(OppRequest.createOppRequest(fbb, OpponentReqMsg.GameId,
                 GameId.createGameId(fbb, gameID)))
-        val gID = OppRequest.getRootAsOppRequest(fbb.dataBuffer())
+        val gameID = OppRequest.getRootAsOppRequest(fbb.dataBuffer())
+        val state = Channel<GameCreationStatus>(Channel.CONFLATED)
 
-        return scope.produce(capacity = Channel.CONFLATED) {
-            reqChan.send(OppReq(gID))
-
+        scope.launch {
+            println("before sending request")
+            reqChan.send(OppReq(gameID))
+            println("before getting response")
             try {
                 val resp = respChan.receive()
-                if (resp.respType() == OpponentRespMsg.GameEvent) {
-                    val event = (resp.resp(GameEvent()) as GameEvent)
-                    if (event.type() == GameEventType.GameStarted) {
-                        Log.d(TAG, "Got GameStart Event")
-                        send(Created)
-                        chan = joinChan2GameChan(respChan)
-                        close()
-                        return@produce
-                    } else {
-                        throw IllegalStateException("expected gameStarted, got ${GameEventType.names[event.type().toInt()]}")
-                    }
-                } else {
+                println("response received")
+
+                if (resp.respType() != OpponentRespMsg.GameEvent) {
                     throw IllegalStateException("expected gameEvent, got ${OpponentRespMsg.name(resp.respType().toInt())}")
                 }
-            } catch (e: ClosedReceiveChannelException) {
-                Log.e(TAG, "got error: $e")
-                send(CreationFailure)
-            } catch (e: io.grpc.StatusException) {
-                Log.e(TAG, "got error: $e")
-                send(CreationFailure)
+
+                val event = (resp.resp(GameEvent()) as GameEvent)
+                if (event.type() != GameEventType.GameStarted) {
+                    throw IllegalStateException("expected gameStarted, got ${GameEventType.names[event.type().toInt()]}")
+                }
+
+                chan = joinChan2GameChan(respChan)
+                //Log.d(TAG, "Got GameStart Event")
+                state.send(Created(this@GameOpponentWrapper))
+
+            } catch (e: io.grpc.StatusRuntimeException) {
+                println("grpc error")
+                state.send(CreationFailure)
+                //Log.e(TAG, "got error: $e")
             }
-            close()
+            println("before closing state chan")
+            state.close()
         }
+
+        return state.consumeAsFlow()
     }
 
-    override suspend fun getMove(): Result<Coord, Interruption> {
+    override suspend fun getMove(): Coord {
         chan.receive().let {
             return when (it) {
-                is GameMove -> Success(Coord(it.i, it.j))
-                is Interruption -> Failure(it)
-                else -> throw IllegalStateException("unexpected response")
+                is GameMove -> Coord(it.row, it.col)
+                is Interruption -> throw InterruptionException(it.cause)
+                else -> throw IllegalArgumentException("unexpected response")
             }
         }
     }
 
-    override suspend fun sendMove(move: Coord): Interruption? {
-        val m = Move.createMove(fbb, move.i.toShort(), move.j.toShort())
+    override suspend fun sendMove(move: Coord) {
+        val m = Move.createMove(fbb, move.row.toShort(), move.col.toShort())
         fbb.finish(OppRequest.createOppRequest(fbb, OpponentReqMsg.Move, m))
         reqChan.send(OppReq(OppRequest.getRootAsOppRequest(fbb.dataBuffer())))
-        return null
     }
 
-    override suspend fun getState(): Result<GameState, Interruption> {
+    override suspend fun getState(): GameState {
         chan.receive().let {
             return when (it) {
-                is State -> Success(it.state)
-                is Interruption -> Failure(it)
-                else -> throw java.lang.IllegalArgumentException("unexpected response")
+                is State -> it.state
+                is Interruption -> throw InterruptionException(it.cause)
+                else -> throw IllegalArgumentException("unexpected response")
             }
         }
     }
 
-    override fun CancelGame() {
+    override fun cancelGame() {
         scope.launch {
             reqChan.send(OppDisconnect)
-            Log.d(TAG, "game canceled")
+            println("game canceled")
+            //Log.d(TAG, "game canceled")
         }
     }
 

@@ -2,6 +2,7 @@
 
 package com.example.game.networking.i9e;
 
+import com.google.flatbuffers.BaseVector;
 import com.google.flatbuffers.Constants;
 import com.google.flatbuffers.FlatBufferBuilder;
 import com.google.flatbuffers.Table;
@@ -16,7 +17,7 @@ import javax.annotation.Nullable;
 @javax.annotation.Generated(value = "flatc")
 public final class GameFilter extends Table {
     public static void ValidateVersion() {
-        Constants.FLATBUFFERS_1_11_1();
+        Constants.FLATBUFFERS_1_12_0();
     }
 
     public static GameFilter getRootAsGameFilter(ByteBuffer _bb) {
@@ -38,34 +39,34 @@ public final class GameFilter extends Table {
     }
 
     public @Nullable
-    Range rows() {
-        return rows(new Range());
+    com.example.game.networking.i9e.Range rows() {
+        return rows(new com.example.game.networking.i9e.Range());
     }
 
     public @Nullable
-    Range rows(Range obj) {
+    com.example.game.networking.i9e.Range rows(com.example.game.networking.i9e.Range obj) {
         int o = __offset(4);
         return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null;
     }
 
     public @Nullable
-    Range cols() {
-        return cols(new Range());
+    com.example.game.networking.i9e.Range cols() {
+        return cols(new com.example.game.networking.i9e.Range());
     }
 
     public @Nullable
-    Range cols(Range obj) {
+    com.example.game.networking.i9e.Range cols(com.example.game.networking.i9e.Range obj) {
         int o = __offset(6);
         return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null;
     }
 
     public @Nullable
-    Range win() {
-        return win(new Range());
+    com.example.game.networking.i9e.Range win() {
+        return win(new com.example.game.networking.i9e.Range());
     }
 
     public @Nullable
-    Range win(Range obj) {
+    com.example.game.networking.i9e.Range win(com.example.game.networking.i9e.Range obj) {
         int o = __offset(8);
         return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null;
     }
@@ -111,6 +112,21 @@ public final class GameFilter extends Table {
     public static int endGameFilter(FlatBufferBuilder builder) {
         int o = builder.endTable();
         return o;
+    }
+
+    public static final class Vector extends BaseVector {
+        public Vector __assign(int _vector, int _element_size, ByteBuffer _bb) {
+            __reset(_vector, _element_size, _bb);
+            return this;
+        }
+
+        public GameFilter get(int j) {
+            return get(new GameFilter(), j);
+        }
+
+        public GameFilter get(GameFilter obj, int j) {
+            return obj.__assign(__indirect(__element(j), bb), bb);
+        }
     }
 }
 

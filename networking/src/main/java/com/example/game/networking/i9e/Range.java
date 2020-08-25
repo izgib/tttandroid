@@ -2,6 +2,7 @@
 
 package com.example.game.networking.i9e;
 
+import com.google.flatbuffers.BaseVector;
 import com.google.flatbuffers.Constants;
 import com.google.flatbuffers.FlatBufferBuilder;
 import com.google.flatbuffers.Table;
@@ -14,7 +15,7 @@ import java.nio.ByteOrder;
 @javax.annotation.Generated(value = "flatc")
 public final class Range extends Table {
     public static void ValidateVersion() {
-        Constants.FLATBUFFERS_1_11_1();
+        Constants.FLATBUFFERS_1_12_0();
     }
 
     public static Range getRootAsRange(ByteBuffer _bb) {
@@ -69,6 +70,21 @@ public final class Range extends Table {
     public static int endRange(FlatBufferBuilder builder) {
         int o = builder.endTable();
         return o;
+    }
+
+    public static final class Vector extends BaseVector {
+        public Vector __assign(int _vector, int _element_size, ByteBuffer _bb) {
+            __reset(_vector, _element_size, _bb);
+            return this;
+        }
+
+        public Range get(int j) {
+            return get(new Range(), j);
+        }
+
+        public Range get(Range obj, int j) {
+            return obj.__assign(__indirect(__element(j), bb), bb);
+        }
     }
 }
 

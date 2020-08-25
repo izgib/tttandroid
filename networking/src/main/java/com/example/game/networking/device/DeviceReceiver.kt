@@ -6,7 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import kotlinx.coroutines.channels.SendChannel
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.channels.sendBlocking
 
 class DeviceReceiver(private val deviceChannel: SendChannel<BluetoothDevice>) : BroadcastReceiver() {
 
@@ -17,9 +17,7 @@ class DeviceReceiver(private val deviceChannel: SendChannel<BluetoothDevice>) : 
     override fun onReceive(context: Context, intent: Intent) {
         Log.d(DR_TAG, "action ${intent.action}")
         if (intent.action == BluetoothDevice.ACTION_FOUND) {
-            runBlocking {
-                deviceChannel.send(intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE))
-            }
+            deviceChannel.sendBlocking(intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE))
         }
     }
 }

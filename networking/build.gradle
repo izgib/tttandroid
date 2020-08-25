@@ -9,22 +9,25 @@ dependencies {
 
     implementation fileTree(dir: 'libs', include: '*.jar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    api 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.2'
-    api 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.2'
-    implementation('com.google.flatbuffers:flatbuffers-java-grpc:1.11.0') {
-        exclude group: 'com.google.flatbuffers', module: 'flatbuffers-java'
-    }
-    implementation 'com.google.flatbuffers:flatbuffers-parent:1.11.0'
-    implementation 'io.grpc:grpc-okhttp:1.11.0'
-    implementation 'io.grpc:grpc-protobuf-lite:1.11.0'
-    implementation 'io.grpc:grpc-stub:1.11.0'
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
+    implementation "com.google.flatbuffers:flatbuffers-java:1.12.0"
+    implementation "io.grpc:grpc-okhttp:1.22.0"
+    implementation "io.grpc:grpc-protobuf:1.22.0"
+    implementation "io.grpc:grpc-stub:1.22.0"
     compileOnly 'org.glassfish:javax.annotation:10.0-b28'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0'
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version"
+    testImplementation "io.grpc:grpc-testing:1.22.0"
+
+    testImplementation project(path: ':controllers', configuration: 'unitTestArtifact')
 }
+
 
 sourceCompatibility = "8"
 targetCompatibility = "8"
 buildscript {
-    ext.kotlin_version = '1.3.50'
     repositories {
         google()
         mavenCentral()

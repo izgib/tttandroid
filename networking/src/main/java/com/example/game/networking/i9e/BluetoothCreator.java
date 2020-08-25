@@ -2,6 +2,7 @@
 
 package com.example.game.networking.i9e;
 
+import com.google.flatbuffers.BaseVector;
 import com.google.flatbuffers.Constants;
 import com.google.flatbuffers.FlatBufferBuilder;
 import com.google.flatbuffers.Table;
@@ -16,7 +17,7 @@ import javax.annotation.Nullable;
 @javax.annotation.Generated(value = "flatc")
 public final class BluetoothCreator extends Table {
     public static void ValidateVersion() {
-        Constants.FLATBUFFERS_1_11_1();
+        Constants.FLATBUFFERS_1_12_0();
     }
 
     public static BluetoothCreator getRootAsBluetoothCreator(ByteBuffer _bb) {
@@ -45,7 +46,7 @@ public final class BluetoothCreator extends Table {
     public @Nullable
     Table msg(Table obj) {
         int o = __offset(6);
-        return o != 0 ? __union(obj, o) : null;
+        return o != 0 ? __union(obj, o + bb_pos) : null;
     }
 
     public static int createBluetoothCreator(FlatBufferBuilder builder,
@@ -72,6 +73,21 @@ public final class BluetoothCreator extends Table {
     public static int endBluetoothCreator(FlatBufferBuilder builder) {
         int o = builder.endTable();
         return o;
+    }
+
+    public static final class Vector extends BaseVector {
+        public Vector __assign(int _vector, int _element_size, ByteBuffer _bb) {
+            __reset(_vector, _element_size, _bb);
+            return this;
+        }
+
+        public BluetoothCreator get(int j) {
+            return get(new BluetoothCreator(), j);
+        }
+
+        public BluetoothCreator get(BluetoothCreator obj, int j) {
+            return obj.__assign(__indirect(__element(j), bb), bb);
+        }
     }
 }
 

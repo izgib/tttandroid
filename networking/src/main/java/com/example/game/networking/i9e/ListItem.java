@@ -2,6 +2,7 @@
 
 package com.example.game.networking.i9e;
 
+import com.google.flatbuffers.BaseVector;
 import com.google.flatbuffers.Constants;
 import com.google.flatbuffers.FlatBufferBuilder;
 import com.google.flatbuffers.Table;
@@ -16,7 +17,7 @@ import javax.annotation.Nullable;
 @javax.annotation.Generated(value = "flatc")
 public final class ListItem extends Table {
     public static void ValidateVersion() {
-        Constants.FLATBUFFERS_1_11_1();
+        Constants.FLATBUFFERS_1_12_0();
     }
 
     public static ListItem getRootAsListItem(ByteBuffer _bb) {
@@ -43,12 +44,12 @@ public final class ListItem extends Table {
     }
 
     public @Nullable
-    GameParams params() {
-        return params(new GameParams());
+    com.example.game.networking.i9e.GameParams params() {
+        return params(new com.example.game.networking.i9e.GameParams());
     }
 
     public @Nullable
-    GameParams params(GameParams obj) {
+    com.example.game.networking.i9e.GameParams params(com.example.game.networking.i9e.GameParams obj) {
         int o = __offset(6);
         return o != 0 ? obj.__assign(__indirect(o + bb_pos), bb) : null;
     }
@@ -77,6 +78,21 @@ public final class ListItem extends Table {
     public static int endListItem(FlatBufferBuilder builder) {
         int o = builder.endTable();
         return o;
+    }
+
+    public static final class Vector extends BaseVector {
+        public Vector __assign(int _vector, int _element_size, ByteBuffer _bb) {
+            __reset(_vector, _element_size, _bb);
+            return this;
+        }
+
+        public ListItem get(int j) {
+            return get(new ListItem(), j);
+        }
+
+        public ListItem get(ListItem obj, int j) {
+            return obj.__assign(__indirect(__element(j), bb), bb);
+        }
     }
 }
 

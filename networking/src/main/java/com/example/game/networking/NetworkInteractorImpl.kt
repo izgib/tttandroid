@@ -1,29 +1,24 @@
 package com.example.game.networking
 
-import android.util.Log
 import com.example.game.controllers.*
+import com.example.game.controllers.models.Range
 import com.example.game.domain.game.Mark
 import com.example.game.networking.i9e.*
 import com.google.flatbuffers.FlatBufferBuilder
 import io.grpc.ManagedChannelBuilder
 import io.grpc.stub.StreamObserver
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.ReceiveChannel
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
 import java.io.IOException
-import kotlin.coroutines.CoroutineContext
+import com.example.game.networking.i9e.Range as FBRange
 
 
-class NetworkInteractorImpl : NetworkInteractor, CoroutineScope {
-    override val coroutineContext: CoroutineContext = Dispatchers.Default
-    private val channel = ManagedChannelBuilder.forAddress(srvAddress, srvPort).usePlaintext().build()
+class NetworkInteractorImpl private constructor(channel: io.grpc.Channel) : NetworkInteractor {
+    //private var channel: io.grpc.Channel = ManagedChannelBuilder.forAddress(srvAddress, srvPort).usePlaintext().build()
     private val asyncStub: GameConfiguratorGrpc.GameConfiguratorStub = GameConfiguratorGrpc.newStub(channel)
     private var gameWrapper: NetworkClient? = null
     private val fbb = FlatBufferBuilder(1024)
@@ -32,25 +27,33 @@ class NetworkInteractorImpl : NetworkInteractor, CoroutineScope {
         const val NI_TAG = "NetworkInteractorImpl"
         const val srvAddress = "192.168.1.107"
         const val srvPort = 8080
+
+        internal fun testInstance(channel: io.grpc.Channel) = NetworkInteractorImpl(channel)
+        fun newInstance() = NetworkInteractorImpl(ManagedChannelBuilder.forAddress(srvAddress, srvPort).usePlaintext().build())
     }
 
     @ExperimentalCoroutinesApi
-    private fun CoroutineScope.Creator(inbox: ReceiveChannel<CreatorRequest>): ReceiveChannel<CrResponse> = produce(capacity = 3) {
+    private fun CoroutineScope.creator(inbox: ReceiveChannel<CreatorRequest>): ReceiveChannel<CrResponse> = produce(capacity = 3) {
+        invokeOnClose { println("response channel closed: creator") }
         val cancelException = io.grpc.StatusException(io.grpc.Status.CANCELLED.withDescription("cancel the game"))
         var thrownByClient = false
 
         val creatorRespObserver = object : StreamObserver<CrResponse> {
-            override fun onNext(value: CrResponse?) {
-                Log.d(NI_TAG, "response received")
-                this@Creator.launch {
-                    send(value!!)
-                }
+            override fun onNext(value: CrResponse) {
+                println("got response in creator function")
+                sendBlocking(value)
+                println("successfully send response to chan")
             }
 
             override fun onError(t: Throwable) {
+                println("got error: $t")
+                println("request channel canceled")
+                inbox.cancel(CancellationException(t.message, t))
+                //inbox.cancel()
                 if (thrownByClient) {
                     close()
                 } else {
+                    println("closed with exception")
                     close(t)
                 }
             }
@@ -80,16 +83,25 @@ class NetworkInteractorImpl : NetworkInteractor, CoroutineScope {
     }
 
     @ExperimentalCoroutinesApi
-    private fun CoroutineScope.Joiner(inbox: ReceiveChannel<OpponentRequest>) = produce(capacity = 3) {
+    private fun CoroutineScope.joiner(inbox: ReceiveChannel<OpponentRequest>) = produce<OppResponse>(capacity = 3) {
+        invokeOnClose { println("response channel closed: joiner") }
+        val cancelException = io.grpc.StatusException(io.grpc.Status.CANCELLED.withDescription("cancel the game"))
+        var thrownByClient = false
         val joinRespObserver = object : StreamObserver<OppResponse> {
-            override fun onNext(value: OppResponse?) {
-                this@Joiner.launch {
-                    send(value!!)
-                }
+            override fun onNext(value: OppResponse) {
+                sendBlocking(value)
             }
 
-            override fun onError(t: Throwable?) {
-                close(t!!)
+            override fun onError(t: Throwable) {
+                println("got error")
+                println("request channel canceled")
+                inbox.cancel(CancellationException(t.message, t))
+                if (thrownByClient) {
+                    close()
+                } else {
+                    println("send error token")
+                    close(t)
+                }
             }
 
             override fun onCompleted() {
@@ -104,19 +116,22 @@ class NetworkInteractorImpl : NetworkInteractor, CoroutineScope {
         }
 
         for (msg in inbox) {
+            println("request received")
             when (msg) {
                 is OppReq -> joinReqObserver.onNext(msg.request)
-                is OppDisconnect -> joinReqObserver.onError(io.grpc.StatusException(
-                        io.grpc.Status.CANCELLED.withDescription("cancel the game")))
+                is OppDisconnect -> {
+                    thrownByClient = true
+                    joinReqObserver.onError(cancelException)
+                }
             }
         }
     }
 
     @ExperimentalCoroutinesApi
-    override fun CreateGame(): GameInitializer {
-        val reqChan = Channel<CreatorRequest>(Channel.UNLIMITED)
-        val respChan = Creator(reqChan)
-        val wrapper = GameCreatorWrapper(reqChan, respChan)
+    override fun CreateGame(scope: CoroutineScope): GameInitializer {
+        val reqChan = Channel<CreatorRequest>()
+        val respChan = scope.creator(reqChan)
+        val wrapper = GameCreatorWrapper(reqChan, respChan, scope)
 
         gameWrapper = wrapper
         return wrapper
@@ -126,8 +141,10 @@ class NetworkInteractorImpl : NetworkInteractor, CoroutineScope {
     private fun listFlow(filter: GameFilter): Flow<GameItem> = callbackFlow {
         val GLObserver = object : StreamObserver<ListItem> {
             override fun onNext(value: ListItem) {
-                val params = value.params()!!
-                offer(GameItem(value.ID(), params.rows().toInt(), params.cols().toInt(), params.win().toInt(), Mark.values()[params.mark().toInt()]))
+                val settings: GameSettings = value.params()!!.run {
+                    GameSettings(rows().toInt(), cols().toInt(), win().toInt(), Mark.values()[mark().toInt()])
+                }
+                sendBlocking(GameItem(value.ID(), settings))
             }
 
             override fun onError(t: Throwable) {
@@ -145,21 +162,26 @@ class NetworkInteractorImpl : NetworkInteractor, CoroutineScope {
     }
 
     @ExperimentalCoroutinesApi
-    override fun GameList(rowRange: ParamRange, colRange: ParamRange, winRange: ParamRange, markF: Byte): Flow<GameItem> {
-        val rowF = Range.createRange(fbb, rowRange.start, rowRange.end)
-        val colF = Range.createRange(fbb, colRange.start, colRange.end)
-        val winF = Range.createRange(fbb, winRange.start, winRange.end)
-        fbb.finish(GameFilter.createGameFilter(fbb, rowF, colF, winF, markF))
+    override fun GameList(rowRange: Range, colRange: Range, winRange: Range, mark: Mark): Flow<GameItem> {
+        val rowF = FBRange.createRange(fbb, rowRange.start.toShort(), rowRange.end.toShort())
+        val colF = FBRange.createRange(fbb, colRange.start.toShort(), colRange.end.toShort())
+        val winF = FBRange.createRange(fbb, winRange.start.toShort(), winRange.end.toShort())
+        val fbMark = when (mark) {
+            Mark.Cross -> MarkTypeFilter.Cross
+            Mark.Nought -> MarkTypeFilter.Nought
+            Mark.Empty -> MarkTypeFilter.Any
+        }
+        fbb.finish(GameFilter.createGameFilter(fbb, rowF, colF, winF, fbMark))
         val filter = GameFilter.getRootAsGameFilter(fbb.dataBuffer())
         return listFlow(filter)
     }
 
     @ExperimentalCoroutinesApi
-    override fun JoinGame(gameID: Short): ReceiveChannel<GameCreationStatus> {
-        val reqChan = Channel<OpponentRequest>(Channel.UNLIMITED)
-        val respChan = Joiner(reqChan)
+    override fun JoinGame(scope: CoroutineScope, gameID: Short): Flow<GameCreationStatus> {
+        val reqChan = Channel<OpponentRequest>()
+        val respChan = scope.joiner(reqChan)
 
-        val wrapper = GameOpponentWrapper(reqChan, respChan)
+        val wrapper = GameOpponentWrapper(reqChan, respChan, scope)
         gameWrapper = wrapper
         return wrapper.joinGame(gameID)
     }
