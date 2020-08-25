@@ -1,15 +1,16 @@
 package com.example.game.controllers
 
+import com.example.game.controllers.models.Range
 import com.example.game.domain.game.Mark
-import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 interface NetworkInteractor {
-    fun CreateGame(): GameInitializer
+    fun CreateGame(scope: CoroutineScope): GameInitializer
 
-    fun GameList(rowRange: ParamRange, colRange: ParamRange, winRange: ParamRange, markF: Byte): Flow<GameItem>
+    fun GameList(rowRange: Range, colRange: Range, winRange: Range, mark: Mark): Flow<GameItem>
 
-    fun JoinGame(gameID: Short): ReceiveChannel<GameCreationStatus>
+    fun JoinGame(scope: CoroutineScope, gameID: Short): Flow<GameCreationStatus>
 
     fun getGameClientWrapper(): NetworkClient
 }
@@ -17,7 +18,6 @@ interface NetworkInteractor {
 sealed class GameCreationStatus
 data class GameID(val ID: Short) : GameCreationStatus()
 object CreationFailure : GameCreationStatus()
-object Created : GameCreationStatus()
+data class Created(val client: NetworkClient) : GameCreationStatus()
 
-
-class GameItem(val ID: Short, val rows: Int, val cols: Int, val win: Int, val mark: Mark)
+data class GameItem(val ID: Short, val settings: GameSettings)
