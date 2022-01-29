@@ -1,4 +1,4 @@
-package com.example.game.domain.game
+package com.example.game
 
 import kotlin.math.max
 import kotlin.math.min
@@ -22,7 +22,6 @@ infix fun Int.pow(power: Int): Int {
 enum class LineStatus {
     Empty, OwnControl, OpponentControl, Contested
 }
-
 
 class Line {
     var st = LineStatus.Empty

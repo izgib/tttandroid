@@ -1,4 +1,4 @@
-package com.example.game.domain.game
+package com.example.game
 
 import kotlin.math.min
 

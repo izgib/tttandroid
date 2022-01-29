@@ -1,9 +1,9 @@
-package com.example.game.domain.game
+package com.example.game
 
 
 open class GameController(internal val rows: Int, internal val cols: Int, internal val win: Int) {
     internal val marks: Array<Mark> = arrayOf(Mark.Cross, Mark.Nought)
-    internal var gameField: Array<Array<Mark>> = Array(rows) { Array(cols) { Mark.Empty } }
+    internal val gameField: Array<Array<Mark>> = Array(rows) { Array(cols) { Mark.Empty } }
     var turn = 0
 
     fun getEmptyCells(): Sequence<Coord> = sequence {

@@ -1,10 +1,11 @@
-package com.example.game.domain.game
-
+import com.example.game.Continues
+import com.example.game.Coord
+import com.example.game.EndWinLine
+import com.example.game.Game
+import com.example.game.GameState
+import com.example.game.Mark
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import kotlin.reflect.KMutableProperty1
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.isAccessible
 
 
 class GameTest {
@@ -13,17 +14,12 @@ class GameTest {
     @Nested
     class `gameWon test` {
         val game = Game(3, 3, 3)
-        private val fieldProperty = game::class.memberProperties.first { it.name == "gameField" } as KMutableProperty1<*, *>
-
 
         private fun setGameField(field: Array<Array<Mark>>) {
-            fieldProperty.setter.call(game, field)
+            for (fInd in field.indices) {
+                game.gameField[fInd] = field[fInd]
+            }
         }
-
-        init {
-            fieldProperty.isAccessible = true
-        }
-
 
         @Test
         fun `Vertical Line`() {
