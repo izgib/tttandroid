@@ -1,9 +1,8 @@
-package com.example.game.controllers
+package com.example.controllers
 
-import com.example.game.domain.game.AIPlayer
-import com.example.game.domain.game.Coord
-import com.example.game.domain.game.GameController
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.example.game.AIPlayer
+import com.example.game.Coord
+import com.example.game.GameController
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -22,14 +21,13 @@ class BotPlayer(controller: GameController) : LocalPlayer {
 }
 
 class ClickRegister(private val validationFunc: (Coord) -> Boolean) : LocalPlayer {
-    @OptIn(ExperimentalCoroutinesApi::class)
     private val _listenerState = MutableStateFlow(false)
     val listenerState: Flow<Boolean> = _listenerState
     val moveChannel = Channel<Coord>()
 
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun getMove(): Coord {
+        println("getting move for clicker")
         _listenerState.value = true
         while (true) {
             val move = moveChannel.receive()

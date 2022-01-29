@@ -1,11 +1,11 @@
-package com.example.game.controllers
+package com.example.controllers
 
-import com.example.game.controllers.models.EndState
-import com.example.game.controllers.models.GameSignal
-import com.example.game.domain.game.*
+import com.example.game.*
+import com.example.controllers.models.EndState
+import com.example.controllers.models.GameSignal
 
 
-data class LocalTestExample(val rows: Int, val cols: Int, val win: Int, val moves: Array<Coord>, val endSignal: GameSignal)
+class LocalTestExample(val rows: Int, val cols: Int, val win: Int, val moves: Array<Coord>, val endSignal: GameSignal)
 
 val winX = LocalTestExample(3, 3, 3, arrayOf(
         Coord(1, 1), Coord(1, 2), Coord(0, 0), Coord(2, 2),

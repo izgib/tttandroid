@@ -1,9 +1,9 @@
-package com.example.game.controllers.models
+package com.example.controllers.models
 
-import com.example.game.controllers.ClickRegister
-import com.example.game.domain.game.Coord
-import com.example.game.domain.game.GameController
-import com.example.game.domain.game.GameState
+import com.example.controllers.ClickRegister
+import com.example.game.Coord
+import com.example.game.GameController
+import com.example.game.GameState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel

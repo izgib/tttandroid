@@ -1,7 +1,7 @@
-package com.example.game.controllers
+package com.example.controllers
 
-import com.example.game.domain.game.Coord
-import com.example.game.domain.game.GameState
+import com.example.game.Coord
+import com.example.game.GameState
 
 //all suspend must throw InterruptionException on error
 interface NetworkClient {

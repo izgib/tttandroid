@@ -1,11 +1,8 @@
-package com.example.game.controllers
+package com.example.controllers
 
-import android.bluetooth.BluetoothDevice
-import com.example.game.domain.game.Mark
-import kotlinx.coroutines.channels.ReceiveChannel
-import java.util.*
+import com.example.game.Mark
 
-interface BluetoothInteractor {
+/*interface BluetoothInteractor {
     fun createGame(settings: GameSettings): ReceiveChannel<GameInitStatus>
 
     fun joinGame(device: BluetoothDevice): ReceiveChannel<GameInitStatus>
@@ -17,7 +14,7 @@ interface BluetoothInteractor {
     companion object {
         val MY_UUID = UUID.fromString("e67682c9-268c-4de8-ad82-44822952c5ee")!!
     }
-}
+}*/
 
 sealed class GameInitStatus {
     object Awaiting : GameInitStatus()

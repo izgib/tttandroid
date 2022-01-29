@@ -1,14 +1,23 @@
-package com.example.game.controllers.models
+package com.example.controllers.models
 
-import com.example.game.controllers.BotPlayer
-import com.example.game.controllers.LocalPlayer
-import com.example.game.controllers.NetworkClient
-import com.example.game.domain.game.*
+import com.example.controllers.BotPlayer
+import com.example.controllers.LocalPlayer
+import com.example.controllers.NetworkClient
+import com.example.game.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.channels.trySendBlocking
+import java.io.Closeable
 
 
-class NetworkGameModel(rows: Int, cols: Int, win: Int, player1: PlayerType, player2: PlayerType, scope: CoroutineScope, private val client: NetworkClient) : GameModel(rows, cols, win, player1, player2, scope) { // GameModel( scope) {
+class NetworkGameModel(
+    rows: Int,
+    cols: Int,
+    win: Int,
+    player1: PlayerType,
+    player2: PlayerType,
+    scope: CoroutineScope,
+    private val client: NetworkClient
+) : GameModel(rows, cols, win, player1, player2, scope) { // GameModel( scope) {
     private val externalController = ExternalController(rows, cols, win)
     override val controller: GameController = externalController
     override val gameLoop: Job
@@ -21,7 +30,7 @@ class NetworkGameModel(rows: Int, cols: Int, win: Int, player1: PlayerType, play
         println("get error")
         val interruption = throwable as InterruptionException
         println("try to send error")
-        gameChannel.sendBlocking(GameInterruption(interruption.reason))
+        gameChannel.trySendBlocking(GameInterruption(interruption.reason))
         gameChannel.close()
     }
 
@@ -55,8 +64,7 @@ class NetworkGameModel(rows: Int, cols: Int, win: Int, player1: PlayerType, play
                 externalController.sendState(condition)
 
                 when (condition) {
-                    is Continues -> {
-                    }
+                    is Continues -> {}
                     else -> {
                         val end = EndState(condition)
                         gameChannel.send(end)
@@ -65,6 +73,10 @@ class NetworkGameModel(rows: Int, cols: Int, win: Int, player1: PlayerType, play
                         return@launch
                     }
                 }
+            }
+        }.apply {
+            invokeOnCompletion {
+                if (client is Closeable) client.close()
             }
         }
     }

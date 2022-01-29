@@ -1,15 +1,24 @@
-package com.example.game.controllers.models
+package com.example.controllers.models
 
-import com.example.game.controllers.BotPlayer
-import com.example.game.controllers.LocalPlayer
-import com.example.game.controllers.NetworkServer
-import com.example.game.domain.game.Continues
-import com.example.game.domain.game.Coord
-import com.example.game.domain.game.Game
-import com.example.game.domain.game.GameController
+import com.example.controllers.BotPlayer
+import com.example.controllers.LocalPlayer
+import com.example.controllers.NetworkServer
+import com.example.game.Continues
+import com.example.game.Coord
+import com.example.game.Game
+import com.example.game.GameController
 import kotlinx.coroutines.*
+import java.io.Closeable
 
-class BluetoothServerGameModel(rows: Int, cols: Int, win: Int, player1: PlayerType, player2: PlayerType, scope: CoroutineScope, private val server: NetworkServer) : GameModel(rows, cols, win, player1, player2, scope) { //GameModel( scope) {
+class BluetoothServerGameModel(
+    rows: Int,
+    cols: Int,
+    win: Int,
+    player1: PlayerType,
+    player2: PlayerType,
+    scope: CoroutineScope,
+    private val server: NetworkServer
+) : GameModel(rows, cols, win, player1, player2, scope) { //GameModel( scope) {
     private val game = Game(rows, cols, win)
     override val controller: GameController = game
     override val gameLoop: Job
@@ -23,7 +32,12 @@ class BluetoothServerGameModel(rows: Int, cols: Int, win: Int, player1: PlayerTy
 
     private val handler = CoroutineExceptionHandler { _, throwable ->
         scope.launch {
-            gameChannel.send(GameInterruption((throwable as InterruptionException).reason))
+            println("get error: $throwable")
+            println(throwable.message)
+            throwable.printStackTrace()
+            val interruption = throwable as InterruptionException
+            println("try to send error")
+            gameChannel.send(GameInterruption((interruption).reason))
         }
     }
 
@@ -40,7 +54,7 @@ class BluetoothServerGameModel(rows: Int, cols: Int, win: Int, player1: PlayerTy
         }
 
         gameLoop = scope.launch(handler, CoroutineStart.LAZY) {
-            while (isActive) {
+            while (game.turn < cols * rows && isActive) {
                 var move: Coord
                 if (game.curPlayer() == localPlayerMask) {
                     move = localPlayer.getMove()
@@ -70,14 +84,20 @@ class BluetoothServerGameModel(rows: Int, cols: Int, win: Int, player1: PlayerTy
                     }
                 }
             }
+        }.apply {
+            invokeOnCompletion {
+                println("closing here")
+                if (server is Closeable) server.close()
+            }
         }
     }
 
     override fun cancel() {
-        super.cancel()
-        scope.launch {
+        runBlocking(scope.coroutineContext) {
             server.sendInterruption(Interruption(InterruptCause.Disconnected))
+            super.cancel()
         }
+
     }
 
     private suspend fun sendInterruption(cause: InterruptCause) {

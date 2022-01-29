@@ -1,7 +1,7 @@
-package com.example.game.controllers
+package com.example.controllers
 
-import com.example.game.controllers.models.Range
-import com.example.game.domain.game.Mark
+import com.example.controllers.models.Range
+import com.example.game.Mark
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 

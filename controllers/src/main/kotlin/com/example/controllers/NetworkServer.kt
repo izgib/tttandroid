@@ -1,12 +1,13 @@
-package com.example.game.controllers
+package com.example.controllers
 
-import com.example.game.controllers.models.Interruption
-import com.example.game.domain.game.Coord
-import com.example.game.domain.game.GameState
+import com.example.controllers.models.Interruption
+import com.example.game.Coord
+import com.example.game.GameState
 
 interface NetworkServer {
     suspend fun getMove(): Coord
     suspend fun sendMove(move: Coord)
     suspend fun sendState(state: GameState)
     suspend fun sendInterruption(interruption: Interruption)
+    fun cancelGame()
 }

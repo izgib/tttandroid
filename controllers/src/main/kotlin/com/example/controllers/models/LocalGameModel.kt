@@ -1,12 +1,12 @@
-package com.example.game.controllers.models
+package com.example.controllers.models
 
 
-import com.example.game.controllers.BotPlayer
-import com.example.game.controllers.LocalPlayer
-import com.example.game.domain.game.Continues
-import com.example.game.domain.game.Coord
-import com.example.game.domain.game.Game
-import com.example.game.domain.game.GameController
+import com.example.controllers.BotPlayer
+import com.example.controllers.LocalPlayer
+import com.example.game.Continues
+import com.example.game.Coord
+import com.example.game.Game
+import com.example.game.GameController
 import kotlinx.coroutines.*
 
 class LocalGameModel(rows: Int, cols: Int, win: Int, player1: PlayerType, player2: PlayerType, scope: CoroutineScope) : GameModel(rows, cols, win, player1, player2, scope) {

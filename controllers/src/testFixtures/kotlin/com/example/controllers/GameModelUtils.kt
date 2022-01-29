@@ -1,42 +1,19 @@
-package com.example.game.controllers
+package com.example.controllers
 
-import com.example.game.controllers.models.*
-import com.example.game.domain.game.Coord
-import kotlinx.coroutines.*
+import com.example.controllers.models.*
+import com.example.game.Coord
+import com.example.game.Mark
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collect
-import org.junit.jupiter.api.DynamicTest
-import org.junit.jupiter.api.TestFactory
-import org.junit.jupiter.api.assertTimeoutPreemptively
-import java.time.Duration
+import kotlinx.coroutines.launch
 
-
-internal class GameModelTest {
-    private val scope = GlobalScope
-
-    private fun setupLocalGame(example: LocalTestExample) {
-        val model = LocalGameModel(example.rows, example.cols, example.win, PlayerType.Human, PlayerType.Human, scope)
-        val job = scope.async {
-            connectClickListener(scope, model, example.moves, PlayerType.Human, PlayerType.Human)
-            consumeGameFlow(scope, model, example.moves, example.endSignal)
-        }
-        assertTimeoutPreemptively(Duration.ofSeconds(1)) {
-            runBlocking {
-                job.await()
-            }
-        }
-    }
-
-    @TestFactory
-    fun `Local Game`(): List<DynamicTest> {
-        return arrayListOf(
-                DynamicTest.dynamicTest("Player X Win") { setupLocalGame(winX) },
-                DynamicTest.dynamicTest("Player O Win") { setupLocalGame(winO) },
-                DynamicTest.dynamicTest("Tied") { setupLocalGame(tie) }
-        )
-    }
-}
-
-fun connectClickListener(scope: CoroutineScope, model: GameModel, moves: Array<Coord>, playerX: PlayerType, playerO: PlayerType) {
+fun connectClickListener(
+    scope: CoroutineScope,
+    model: GameModel,
+    moves: Array<Coord>,
+    playerX: PlayerType,
+    playerO: PlayerType
+) {
     val players = arrayOf(playerX, playerO)
     val moveIterator = moves.iterator().withIndex()
     scope.launch {
@@ -56,9 +33,14 @@ fun connectClickListener(scope: CoroutineScope, model: GameModel, moves: Array<C
     }
 }
 
-fun consumeGameFlow(scope: CoroutineScope, model: GameModel, moves: Array<Coord>, endSignal: GameSignal) {
+fun consumeGameFlow(
+    scope: CoroutineScope,
+    model: GameModel,
+    moves: Array<Coord>,
+    endSignal: GameSignal
+) {
+    val gameField = GameField(model.rows, model.cols, model.win)
     val moveIterator = moves.iterator().withIndex()
-    model.start()
     scope.launch {
         model.gameFlow.collect { signal ->
             when (signal) {
@@ -67,15 +49,19 @@ fun consumeGameFlow(scope: CoroutineScope, model: GameModel, moves: Array<Coord>
                     val real = when (i and 1) {
                         0 -> {
                             check(signal is Cross)
-                            signal.move
+                            signal.move //.also { gameField.putX(it) }
                         }
                         1 -> {
                             check(signal is Nought)
-                            signal.move
+                            signal.move //.also { gameField.putO(it) }
                         }
                         else -> throw IllegalStateException()
                     }
                     assert(expected == real) { "Player move expected to be $expected, but got $real" }
+/*                    val line = CharArray(gameField.cols){'-'}
+                    println(line)
+                    print(gameField)
+                    println(line)*/
                 }
                 is EndState -> {
                     val real = signal.state
@@ -91,6 +77,31 @@ fun consumeGameFlow(scope: CoroutineScope, model: GameModel, moves: Array<Coord>
                     return@collect
                 }
             }
+        }
+    }
+    model.start()
+}
+
+private class GameField(val rows: Int, val cols: Int, var winLine: Int) {
+    private val gameField: Array<Array<Mark>> = Array(rows) { Array(cols) { Mark.Empty } }
+
+    fun putX(move: Coord) {
+        gameField[move.row][move.col] = Mark.Cross
+    }
+
+    fun putO(move: Coord) {
+        gameField[move.row][move.col] = Mark.Nought
+    }
+
+    override fun toString(): String = buildString(rows * (cols + 1)) {
+        gameField.forEach { row ->
+            appendLine(CharArray(cols) { i ->
+                when (row[i]) {
+                    Mark.Cross -> 'X'
+                    Mark.Nought -> 'O'
+                    Mark.Empty -> ' '
+                }
+            })
         }
     }
 }

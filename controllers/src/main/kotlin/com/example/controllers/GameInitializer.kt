@@ -1,4 +1,4 @@
-package com.example.game.controllers
+package com.example.controllers
 
 import kotlinx.coroutines.flow.Flow
 
