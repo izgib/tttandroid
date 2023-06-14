@@ -5,7 +5,7 @@ import com.zhuinden.simplestack.ScopeKey
 import com.zhuinden.simplestack.ServiceBinder
 
 
-abstract class DialogBaseWithResult<T> : DialogBase(), ScopeKey {
+abstract class DialogBaseWithResult<T: Any?> : DialogBase(), ScopeKey {
     abstract val resultHandler: ResultHandler<T>
     fun bindResultRecorder(serviceBinder: ServiceBinder) {
         with(serviceBinder) {

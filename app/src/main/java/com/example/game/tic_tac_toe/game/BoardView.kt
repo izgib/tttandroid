@@ -7,19 +7,32 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
-import com.example.game.domain.game.Coord
+import com.example.game.Coord
+import com.example.game.Mark
+import com.example.game.MarkLists
 import com.example.game.tic_tac_toe.R
 import java.nio.InvalidMarkException
 import kotlin.math.abs
 
 
-class BoardView(context: Context, attrs: AttributeSet) : View(context, attrs), Drawer {
+//class BoardView(context: Context, attrs: AttributeSet?) : View(context, attrs) {
+class BoardView : View {
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) :
+            super(context, attrs, defStyleAttr, defStyleRes)
+
     private val crossRes = ContextCompat.getDrawable(context, R.drawable.ic_cross)
     private val noughtRes = ContextCompat.getDrawable(context, R.drawable.ic_nought)
     private var SQUARE_SIZE: Int = 0
@@ -32,8 +45,10 @@ class BoardView(context: Context, attrs: AttributeSet) : View(context, attrs), D
     private lateinit var extraBitmap: Bitmap
     private lateinit var extraCanvas: Canvas
 
-    private var cols = 0
-    private var rows = 0
+    private var cols = 3
+    private var rows = 3
+    private var xMarks: List<Coord> = emptyList()
+    private var oMarks: List<Coord> = emptyList()
 
     private val paint: Paint = Paint()
     private val crossPaint: Paint
@@ -92,7 +107,6 @@ class BoardView(context: Context, attrs: AttributeSet) : View(context, attrs), D
         const val TAG = "BoardView"
     }
 
-
     init {
         paint.strokeWidth = fieldPaintWidth
 
@@ -110,9 +124,10 @@ class BoardView(context: Context, attrs: AttributeSet) : View(context, attrs), D
         paints = arrayOf(crossPaint, noughtPaint)
     }
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
+        Log.d(TAG, "onDraw call")
         super.onDraw(canvas)
-        canvas!!.drawBitmap(extraBitmap, 0f, 0f, null)
+        canvas.drawBitmap(extraBitmap, 0f, 0f, null)
     }
 
 
@@ -146,7 +161,13 @@ class BoardView(context: Context, attrs: AttributeSet) : View(context, attrs), D
         this.cols = cols
     }
 
-    override fun drawField() {
+    fun initMoves(markLists: MarkLists) {
+        xMarks = markLists.crosses
+        oMarks = markLists.noughts
+    }
+
+
+    fun drawField() {
         if (rows == 0 && cols == 0) {
             throw IllegalStateException("game was not initialized")
         }
@@ -165,25 +186,31 @@ class BoardView(context: Context, attrs: AttributeSet) : View(context, attrs), D
                     paint
             )
         }
+        for (move in xMarks) {
+            putX(move.row, move.col)
+        }
+        for (move in oMarks) {
+            putO(move.row, move.col)
+        }
 
         Log.d("View", "field drawn")
     }
 
-    override fun putX(i: Int, j: Int) {
+    fun putX(i: Int, j: Int) {
         extraCanvas.drawBitmap(crossBitmap, FIELD_OFFSET_x + SQUARE_SIZE * j,
                 FIELD_OFFSET_y + SQUARE_SIZE * i, null)
     }
 
 
-    override fun putO(i: Int, j: Int) {
+    fun putO(i: Int, j: Int) {
         extraCanvas.drawBitmap(noughtBitmap, FIELD_OFFSET_x + SQUARE_SIZE * j,
                 FIELD_OFFSET_x + SQUARE_SIZE * i, null)
     }
 
-    override fun putWLine(i1: Int, j1: Int, i2: Int, j2: Int, player: com.example.game.domain.game.Mark) {
+    fun putWLine(i1: Int, j1: Int, i2: Int, j2: Int, player: Mark) {
         val paint: Paint = when (player) {
-            com.example.game.domain.game.Mark.Cross -> crossPaint
-            com.example.game.domain.game.Mark.Nought -> noughtPaint
+            Mark.Cross -> crossPaint
+            Mark.Nought -> noughtPaint
             else -> throw InvalidMarkException()
         }
 
@@ -205,7 +232,13 @@ class BoardView(context: Context, attrs: AttributeSet) : View(context, attrs), D
         invalidate()
     }
 
-    override fun updateCanvas() {
+    fun updateCanvas() {
+        invalidate()
+    }
+
+    fun clearField() {
+        extraBitmap.eraseColor(Color.TRANSPARENT)
+        drawField()
         invalidate()
     }
 

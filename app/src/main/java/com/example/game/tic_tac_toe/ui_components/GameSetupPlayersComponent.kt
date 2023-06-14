@@ -9,56 +9,63 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import com.example.game.controllers.models.GameType
-import com.example.game.controllers.models.PlayerType
+import com.example.controllers.models.GameType
+import com.example.controllers.models.PlayerType
 import com.example.game.tic_tac_toe.R
 import com.example.game.tic_tac_toe.databinding.GameSetupStepPlayersBinding
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
-class GameSetupPlayersComponent(private val container: ViewGroup, state: GameSetupPlayersState) : UIComponent<PlayersSettings> {
-    private val binding = inflateView()
+class GameSetupPlayersComponent(private val binding: GameSetupStepPlayersBinding, state: GameSetupPlayersState) : UIComponent<PlayersSettings> {
     private var playerSettings: Flow<PlayersSettings>
 
     override fun getUserInteractionEvents(): Flow<PlayersSettings> = playerSettings
 
-    private fun inflateView() = GameSetupStepPlayersBinding.inflate(LayoutInflater.from(container.context), container)
-
     init {
-        val players = getOpponents(container.context, state.gameType)
+        val context = binding.root.context
+
+        val players = getOpponents(context, state.gameType)
         binding.apply {
-            playerXSpinner.adapter = OpponentChoose(container.context, R.layout.opponent_spinner, players)
+            playerXSpinner.adapter = OpponentChoose(context, R.layout.opponent_spinner, players)
             setPlayerX(state.playerX)
 
-            playerOSpinner.adapter = OpponentChoose(container.context, R.layout.opponent_spinner, players)
+            playerOSpinner.adapter = OpponentChoose(context, R.layout.opponent_spinner, players)
             setPlayerO(state.playerO)
 
             playerSettings = callbackFlow<PlayersSettings> {
                 val playerListener = object : AdapterView.OnItemSelectedListener {
                     override fun onNothingSelected(parent: AdapterView<*>) {}
-                    override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+                    override fun onItemSelected(
+                        parent: AdapterView<*>,
+                        view: View?,
+                        position: Int,
+                        id: Long
+                    ) {
+                        println("parent: $parent, view: $view")
                         val playerType = typeFromPosition(state.gameType, position)
-                        sendBlocking(when (parent.id) {
-                            playerXSpinner.id -> PlayerX(playerType)
-                            playerOSpinner.id -> PlayerO(playerType)
-                            else -> throw IllegalStateException()
-                        })
+                        trySend(
+                            when (parent.id) {
+                                playerXSpinner.id -> PlayerX(playerType)
+                                playerOSpinner.id -> PlayerO(playerType)
+                                else -> throw IllegalStateException()
+                            }
+                        )
                     }
                 }
                 playerXSpinner.onItemSelectedListener = playerListener
                 playerOSpinner.onItemSelectedListener = playerListener
 
                 val clickListener = View.OnClickListener { v ->
-                    sendBlocking(when (v.id) {
-                        reshuffle.id -> Reshuffle
-                        gameCreate.id -> CreateGame
-                        else -> throw IllegalStateException()
-                    })
+                    trySendBlocking(
+                        when (v.id) {
+                            reshuffle.id -> Reshuffle
+                            else -> throw IllegalStateException()
+                        }
+                    )
                 }
                 reshuffle.setOnClickListener(clickListener)
-                gameCreate.setOnClickListener(clickListener)
                 awaitClose()
             }
         }
@@ -71,6 +78,19 @@ class GameSetupPlayersComponent(private val container: ViewGroup, state: GameSet
     fun setPlayerO(type: PlayerType) {
         binding.playerOSpinner.setSelection(type.toPosition())
     }
+
+    companion object {
+        fun bind(view: View, state: GameSetupPlayersState): GameSetupPlayersComponent {
+            return GameSetupPlayersComponent(GameSetupStepPlayersBinding.bind(view), state)
+        }
+
+        fun inflate(container: ViewGroup, state: GameSetupPlayersState): GameSetupPlayersComponent {
+            return GameSetupPlayersComponent(GameSetupStepPlayersBinding.inflate(
+                    LayoutInflater.from(container.context), container),
+                    state,
+            )
+        }
+    }
 }
 
 data class GameSetupPlayersState(val gameType: GameType, val playerX: PlayerType, val playerO: PlayerType)
@@ -79,7 +99,7 @@ data class Opponent(val img: Drawable, val oName: String)
 class OpponentChoose(context: Context, resource: Int, private val opps: ArrayList<Opponent>) : ArrayAdapter<Opponent>(context, resource, opps) {
     private val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+    override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
         return getDropDownView(position, convertView, parent)
     }
 
@@ -101,7 +121,7 @@ private fun typeFromPosition(gameType: GameType, position: Int): PlayerType {
     return when (position) {
         Bot -> PlayerType.Bot
         Human -> PlayerType.Human
-        Network -> if (gameType == GameType.Bluetooth) {
+        Network -> if (gameType == GameType.BluetoothClassic || gameType == GameType.BluetoothLE) {
             PlayerType.Bluetooth
         } else {
             PlayerType.Network
@@ -118,12 +138,11 @@ private fun PlayerType.toPosition(): Int {
     }
 }
 
-
 // 1. Bot, 2.Human, 3.(Nobody|Bluetooth|Network)
 fun getOpponents(context: Context, gameType: GameType): ArrayList<Opponent> {
     val size = when (gameType) {
         GameType.Local -> 2
-        GameType.Bluetooth, GameType.Network -> 3
+        GameType.BluetoothClassic, GameType.Network, GameType.BluetoothLE -> 3
     }
     val data = ArrayList<Opponent>(size)
 
@@ -137,7 +156,7 @@ fun getOpponents(context: Context, gameType: GameType): ArrayList<Opponent> {
 
     when (gameType) {
         GameType.Local -> return data
-        GameType.Bluetooth -> {
+        GameType.BluetoothClassic, GameType.BluetoothLE -> {
             img = ContextCompat.getDrawable(context, R.drawable.ic_bluetooth_blue_24dp)!!
             name = "bluetooth"
         }
@@ -155,4 +174,3 @@ sealed class PlayersSettings
 data class PlayerX(val player: PlayerType) : PlayersSettings()
 data class PlayerO(val player: PlayerType) : PlayersSettings()
 object Reshuffle : PlayersSettings()
-object CreateGame : PlayersSettings()

@@ -6,15 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ProgressBar
-import com.example.game.controllers.GameItem
-import com.example.game.domain.game.Mark
-import com.example.game.domain.game.not
+import com.example.controllers.GameItem
+import com.example.game.Mark
+import com.example.game.not
 import com.example.game.tic_tac_toe.R
 import com.example.game.tic_tac_toe.databinding.GameListBinding
 import com.example.game.tic_tac_toe.databinding.GameListItemBinding
-import kotlinx.android.synthetic.main.game_list_item.view.*
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
@@ -33,9 +32,7 @@ class GameFoundListComponent(private val container: ViewGroup) : UIComponent<Int
 
             listPos = callbackFlow<Int> {
                 gameList.setOnItemClickListener { _, _, position, _ ->
-                    gameList.isClickable = false
-                    gameList.progress_bar.visibility = ProgressBar.VISIBLE
-                    sendBlocking(position)
+                    trySendBlocking(position)
                 }
                 awaitClose {
                     gameList.onItemClickListener = null
@@ -97,12 +94,8 @@ class GameAdapter(context: Context, private val items: ArrayList<GameItem>) :
                     gameWin.text = win.toString()
                     gameMark.setImageResource(
                             when (!creatorMark) {
-                                Mark.Cross -> {
-                                    R.drawable.ic_cross
-                                }
-                                Mark.Nought -> {
-                                    R.drawable.ic_nought
-                                }
+                                Mark.Cross -> R.drawable.ic_cross
+                                Mark.Nought -> R.drawable.ic_nought
                                 Mark.Empty -> throw IllegalArgumentException("wrong mark")
                             }
                     )

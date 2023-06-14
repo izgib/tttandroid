@@ -8,21 +8,23 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.example.game.tic_tac_toe.databinding.BtDeviceBinding
 import kotlinx.coroutines.flow.Flow
 
-class LabeledListComponent(private val label: TextView, private val list: ListView, state: LabeledListState) : UIComponent<Int> {
-    private val listComponent: DeviceListComponent
-    override fun getUserInteractionEvents(): Flow<Int> = listComponent.getUserInteractionEvents()
+class LabeledDeviceSetComponent(private val label: TextView, private val list: RecyclerView, state: LabeledSetState) : UIComponent<BluetoothDevice> {
+    private val listComponent: DeviceSetComponent
+    override fun getUserInteractionEvents(): Flow<BluetoothDevice> = listComponent.getUserInteractionEvents()
 
     init {
+        println("${label.text} devices: ${state.devices.count()}")
         label.text = state.label
         label.visibility = if (state.labelVisibility) {
             View.VISIBLE
         } else {
             View.GONE
         }
-        listComponent = DeviceListComponent(list, state.devices)
+        listComponent = DeviceSetComponent(list, state.devices)
     }
 
     fun setLabelVisibility(visible: Boolean) {
@@ -38,8 +40,8 @@ class LabeledListComponent(private val label: TextView, private val list: ListVi
     }
 }
 
+data class LabeledSetState(val label: String, val labelVisibility: Boolean, val devices: LinkedHashSet<BluetoothDevice>)
 
-data class LabeledListState(val label: String, val labelVisibility: Boolean, val devices: ArrayList<BluetoothDevice>)
 
 class BtDevicesAdapter(
         context: Context,

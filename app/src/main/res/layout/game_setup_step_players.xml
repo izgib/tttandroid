@@ -1,55 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<merge android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout">
 
-    <Button
-        android:id="@+id/game_create"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Создать игру"
-        app:layout_constraintBottom_toTopOf="@+id/onTop"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        app:layout_constraintVertical_chainStyle="packed" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/onTop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="game_create"
-        app:layout_constraintTop_toBottomOf="@id/game_create"
-        app:layout_constraintBottom_toTopOf="@id/player1" />
 
     <TextView
         android:id="@+id/player1"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:text="player"
-        app:layout_constraintBottom_toTopOf="@id/player2"
+        app:layout_constraintBottom_toBottomOf="@id/playerX"
         app:layout_constraintEnd_toStartOf="@+id/playerX"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/onTop"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintStart_toEndOf="@id/reshuffle"
+        app:layout_constraintTop_toTopOf="@id/playerX" />
 
     <ImageView
         android:id="@+id/playerX"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="TODO"
-        app:layout_constraintBottom_toBottomOf="@+id/player1"
+        app:layout_constraintBottom_toTopOf="@+id/playerO"
         app:layout_constraintEnd_toStartOf="@+id/playerXSpinner"
         app:layout_constraintStart_toEndOf="@+id/player1"
-        app:layout_constraintTop_toTopOf="@+id/player1"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintTop_toBottomOf="@+id/winnum"
         app:srcCompat="@drawable/ic_cross" />
 
     <Spinner
@@ -59,55 +36,38 @@
         app:layout_constraintBottom_toBottomOf="@+id/playerX"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/playerX"
-        app:layout_constraintTop_toTopOf="@+id/playerX"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="@+id/playerX" />
 
     <TextView
         android:id="@+id/player2"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:text="player"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/PlayerO"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/player1" />
+        app:layout_constraintBottom_toBottomOf="@id/playerO"
+        app:layout_constraintEnd_toStartOf="@+id/playerO"
+        app:layout_constraintTop_toTopOf="@id/playerO" />
 
     <ImageView
-        android:id="@+id/PlayerO"
+        android:id="@+id/playerO"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="TODO"
-        app:layout_constraintBottom_toBottomOf="@+id/player2"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/playerOSpinner"
+        app:layout_constraintStart_toStartOf="@id/playerX"
+        app:layout_constraintEnd_toEndOf="@id/playerX"
         app:layout_constraintStart_toEndOf="@+id/player2"
-        app:layout_constraintTop_toTopOf="@+id/player2"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5"
         app:srcCompat="@drawable/ic_nought" />
 
     <Spinner
         android:id="@+id/playerOSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/PlayerO"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/PlayerO"
-        app:layout_constraintTop_toTopOf="@+id/PlayerO"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/barrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="start"
-        app:constraint_referenced_ids="player1,player2" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/onBot"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="playerOSpinner,PlayerO,player2" />
+        app:layout_constraintBottom_toBottomOf="@+id/playerO"
+        app:layout_constraintStart_toEndOf="@+id/playerO"
+        app:layout_constraintTop_toTopOf="@+id/playerO" />
 
 
     <ImageButton
@@ -117,14 +77,22 @@
         android:background="@null"
         android:contentDescription="TODO"
         android:scaleType="fitXY"
-        app:layout_constraintBottom_toTopOf="@id/onBot"
-        app:layout_constraintEnd_toStartOf="@+id/barrier"
+        app:layout_constraintBottom_toBottomOf="@id/playerO"
         app:layout_constraintDimensionRatio="1"
-        app:layout_constraintTop_toBottomOf="@id/onTop"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintEnd_toStartOf="@+id/player1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/playerX"
+        app:layout_constraintHorizontal_chainStyle="packed"
         app:srcCompat="@drawable/ic_loop_24dp" />
-    <!--layout_constrainedHeight="true"-->
 
+    <Button
+        android:id="@+id/game_create"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Создать игру"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/playerO" />
 </merge>
 
 

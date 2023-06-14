@@ -12,8 +12,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
-import com.example.game.controllers.GameID
-import com.example.game.controllers.GameInitializer
+import com.example.controllers.GameID
+import com.example.controllers.GameInitializer
 import com.example.game.tic_tac_toe.GameApplication
 import com.example.game.tic_tac_toe.R
 import kotlinx.coroutines.GlobalScope

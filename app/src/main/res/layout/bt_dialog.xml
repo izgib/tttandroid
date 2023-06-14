@@ -46,10 +46,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:text='@{pairedAdapter.isEmpty() ? "Нет сопряженных устройств" : "Сопяреженные устройства" }'
+            android:text="Сопяреженные устройства"
             tools:text="Сопряженные устройства" />
 
-        <ListView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/bt_paired_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
@@ -65,7 +65,7 @@
         android:text="Другие доступные устройcтва"
         android:visibility="gone" />
 
-    <ListView
+    <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/bt_found_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

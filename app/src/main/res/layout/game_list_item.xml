@@ -18,7 +18,7 @@
             android:background="@android:color/holo_red_light"
             android:textSize="18sp"
             android:textStyle="bold"
-            tools:text="Lol" />
+            tools:text="1337" />
 
         <ImageView
             android:id="@+id/game_mark"
@@ -64,6 +64,7 @@
         android:indeterminate="true"
         android:visibility="gone"
         tools:visibility="visible"
+        tools:progress="33"
         tools:indeterminate="false" />
 
 </LinearLayout>

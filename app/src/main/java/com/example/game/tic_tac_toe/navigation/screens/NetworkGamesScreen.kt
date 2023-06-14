@@ -1,7 +1,6 @@
 package com.example.game.tic_tac_toe.navigation.screens
 
 import androidx.fragment.app.Fragment
-import com.example.game.networking.NetworkInteractorImpl
 import com.example.game.tic_tac_toe.navigation.base.HasServices
 import com.example.game.tic_tac_toe.navigation.base.ScreenBase
 import com.example.game.tic_tac_toe.navigation.base.add
@@ -10,8 +9,9 @@ import com.example.game.tic_tac_toe.navigation.scopes.GameConfig
 import com.example.game.tic_tac_toe.navigation.scopes.GameFindConfig
 import com.example.game.tic_tac_toe.navigation.scopes.NetworkInitializer
 import com.example.game.tic_tac_toe.network.NetworkGamesList
+import com.example.transport.service.NetworkInteractor
 import com.zhuinden.simplestack.ServiceBinder
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class NetworkGamesScreen : ScreenBase(), HasServices {
@@ -23,7 +23,7 @@ class NetworkGamesScreen : ScreenBase(), HasServices {
         with(serviceBinder) {
             add(GameConfig(lookup()))
             add(GameFindConfig())
-            add(NetworkInitializer(NetworkInteractorImpl.newInstance(), backstack))
+            add(NetworkInitializer(NetworkInteractor.newInstance(), backstack))
         }
     }
 }

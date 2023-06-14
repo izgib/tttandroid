@@ -1,8 +1,8 @@
 package com.example.game.tic_tac_toe.navigation.scopes
 
-import com.example.game.controllers.models.Range
-import com.example.game.domain.game.GameRules
-import com.example.game.domain.game.Mark
+import com.example.controllers.models.Range
+import com.example.game.GameRules
+import com.example.game.Mark
 import com.zhuinden.simplestack.Bundleable
 import com.zhuinden.statebundle.StateBundle
 

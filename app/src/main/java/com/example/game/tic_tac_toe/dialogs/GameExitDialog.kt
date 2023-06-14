@@ -5,19 +5,22 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import com.example.game.tic_tac_toe.navigation.base.dialogs.BaseDialogFragment
 import com.example.game.tic_tac_toe.navigation.screens.dialogs.DualResponse
+import com.example.game.tic_tac_toe.navigation.screens.dialogs.MenuResponse
 
 class GameExitDialog : BaseDialogFragment() {
-    private val handler by lazy { getResultHandler<DualResponse>() }
+    private val handler by lazy { getResultHandler<DualResponse?>() }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(requireContext())
         builder.setMessage("Вы действительно хотите выйти?")
-                .setPositiveButton("Да") { _, _ ->
-                    handler.result = DualResponse.Yes
-                }
-                .setNegativeButton("Нет") { _, _ ->
-                    handler.result = DualResponse.No
-                }
+            .setPositiveButton("Да") { _, _ ->
+                handler.result = DualResponse.Yes
+            }
+            .setNegativeButton("Нет") { _, _ ->
+                handler.result = DualResponse.No
+            }.setOnCancelListener {
+                handler.result = null
+            }
 
         return builder.create()
     }

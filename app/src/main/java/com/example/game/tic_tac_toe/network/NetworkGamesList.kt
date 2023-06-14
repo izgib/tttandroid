@@ -6,10 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.example.game.controllers.CreationFailure
-import com.example.game.controllers.GameItem
-import com.example.game.controllers.models.ParamRange
-import com.example.game.domain.game.GameRules
+import com.example.controllers.CreationFailure
+import com.example.controllers.GameItem
+import com.example.controllers.models.ParamRange
+import com.example.game.GameRules
 import com.example.game.tic_tac_toe.databinding.RootConstraintLayoutBinding
 import com.example.game.tic_tac_toe.navigation.base.lookup
 import com.example.game.tic_tac_toe.navigation.scopes.GameFindConfig

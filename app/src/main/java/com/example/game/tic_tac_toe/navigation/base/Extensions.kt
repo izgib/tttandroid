@@ -1,14 +1,23 @@
 package com.example.game.tic_tac_toe.navigation.base
 
+import android.content.Context
+import android.view.View
 import androidx.fragment.app.Fragment
-import com.example.game.networking.device.BluetoothSensor
-import com.example.game.networking.device.NetworkSensor
 import com.example.game.tic_tac_toe.navigation.base.dialogs.DialogService
 import com.example.game.tic_tac_toe.notifications.NotificationsManager
+import com.example.game.tic_tac_toe.sensors.NetworkSensor
+import com.example.transport.device.BluetoothLESensor
+import com.example.transport.device.BluetoothSensor
 import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.GlobalServices
 import com.zhuinden.simplestack.ServiceBinder
 import com.zhuinden.simplestack.navigator.Navigator
+
+val Context.backstack: Backstack
+    get() = Navigator.getBackstack(this)
+
+val View.backstack: Backstack
+    get() = context.backstack
 
 val Fragment.backstack: Backstack
     get() = Navigator.getBackstack(requireContext())
@@ -19,6 +28,9 @@ val Backstack.dialogs: DialogService
 val Backstack.bluetooth: BluetoothSensor
     get() = lookup()
 
+val Backstack.bluetoothLE: BluetoothLESensor
+    get() = lookup()
+
 val Backstack.network: NetworkSensor
     get() = lookup()
 
@@ -26,6 +38,8 @@ val Backstack.notifications: NotificationsManager
     get() = lookup()
 
 inline fun <reified T> Backstack.lookup(serviceTag: String = T::class.java.name) = lookupService<T>(serviceTag)
+
+inline fun <reified T> View.lookup(serviceTag: String = T::class.java.name) = backstack.lookup<T>(serviceTag)
 
 inline fun <reified T> Fragment.lookup(serviceTag: String = T::class.java.name) = backstack.lookup<T>(serviceTag)
 

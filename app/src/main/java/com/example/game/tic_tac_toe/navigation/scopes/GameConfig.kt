@@ -1,10 +1,10 @@
 package com.example.game.tic_tac_toe.navigation.scopes
 
-import com.example.game.controllers.GameSettings
-import com.example.game.controllers.models.GameType
-import com.example.game.controllers.models.PlayerType
-import com.example.game.domain.game.GameRules
-import com.example.game.domain.game.Mark
+import com.example.controllers.GameSettings
+import com.example.controllers.models.GameType
+import com.example.controllers.models.PlayerType
+import com.example.game.GameRules
+import com.example.game.Mark
 import com.zhuinden.simplestack.Bundleable
 import com.zhuinden.simplestack.ScopedServices
 import com.zhuinden.statebundle.StateBundle
@@ -22,7 +22,7 @@ class GameConfig(private val type: TypeStorage) : Bundleable, ScopedServices.Act
         player1 = PlayerType.Human
         player2 = when (type.gameType) {
             GameType.Local -> PlayerType.Bot
-            GameType.Bluetooth -> PlayerType.Bluetooth
+            GameType.BluetoothClassic, GameType.BluetoothLE -> PlayerType.Bluetooth
             GameType.Network -> PlayerType.Network
         }
     }
@@ -42,7 +42,7 @@ class GameConfig(private val type: TypeStorage) : Bundleable, ScopedServices.Act
         }
         return when (type.gameType) {
             GameType.Local -> locPlayersCount == 2
-            GameType.Bluetooth -> locPlayersCount == 1 && (player1 == PlayerType.Bluetooth || player2 == PlayerType.Bluetooth)
+            GameType.BluetoothClassic, GameType.BluetoothLE -> locPlayersCount == 1 && (player1 == PlayerType.Bluetooth || player2 == PlayerType.Bluetooth)
             GameType.Network -> locPlayersCount == 1 && (player1 == PlayerType.Network || player2 == PlayerType.Network)
         }
     }
@@ -70,12 +70,13 @@ class GameConfig(private val type: TypeStorage) : Bundleable, ScopedServices.Act
     override fun onServiceActive() = setupPlayers()
 }
 
+// Change CameConfig to fit for RemotePlayer settings
 fun GameConfig.fromSettings(settings: GameSettings) {
     rows = settings.rows
     cols = settings.cols
     win = settings.win
     val remotePlayer = when (gameType) {
-        GameType.Bluetooth -> PlayerType.Bluetooth
+        GameType.BluetoothClassic, GameType.BluetoothLE -> PlayerType.Bluetooth
         GameType.Network -> PlayerType.Network
         else -> throw IllegalStateException()
     }

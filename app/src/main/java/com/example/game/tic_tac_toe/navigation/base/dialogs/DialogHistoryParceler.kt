@@ -1,7 +1,7 @@
 package com.example.game.tic_tac_toe.navigation.base.dialogs
 
 import android.os.Parcel
-import kotlinx.android.parcel.Parceler
+import kotlinx.parcelize.Parceler
 import java.util.*
 import kotlin.collections.ArrayDeque
 

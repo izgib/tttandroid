@@ -5,14 +5,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.doOnLayout
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.lifecycleScope
-import com.example.game.controllers.models.Cross
-import com.example.game.controllers.models.EndState
-import com.example.game.controllers.models.GameInterruption
-import com.example.game.controllers.models.Nought
-import com.example.game.domain.game.Mark
-import com.example.game.domain.game.Tie
-import com.example.game.domain.game.Win
+import com.example.controllers.models.*
+import com.example.game.Mark
+import com.example.game.Tie
+import com.example.game.Win
 import com.example.game.tic_tac_toe.databinding.RootLinearLayoutBinding
 import com.example.game.tic_tac_toe.navigation.base.*
 import com.example.game.tic_tac_toe.navigation.scopes.GameConfig
@@ -21,9 +20,8 @@ import com.example.game.tic_tac_toe.navigation.screens.dialogs.GameError
 import com.example.game.tic_tac_toe.navigation.screens.dialogs.GameResult
 import com.example.game.tic_tac_toe.ui_components.GameComponent
 import com.example.game.tic_tac_toe.ui_components.GameState
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 
@@ -33,70 +31,135 @@ class GameFragment : BaseFragment() {
     private val config by lazy<GameConfig> { lookup() }
     private val notifications by lazy { backstack.notifications }
 
-    @ExperimentalCoroutinesApi
     private val gameController by lazy<GameController> { lookup() }
+    private var gameConfigured: Boolean = false
 
     companion object {
         const val TAG = "GameFragment"
     }
 
-    @ExperimentalCoroutinesApi
-    private fun setGameObserver(scope: CoroutineScope) {
+    private fun setGameObserver(scope: LifecycleCoroutineScope) {
         scope.launch {
-            gameController.gameFlow.collect { signal ->
-                when (signal) {
-                    is Cross -> {
-                        game.putX(signal.move)
+            while (true) {
+                gameController.started
+                val final = gameController.gameFlow.onEach { signal ->
+                    when (signal) {
+                        is Cross -> game.putX(signal.move)
+                        is Nought -> game.putO(signal.move)
+                        else -> return@onEach
                     }
-                    is Nought -> {
-                        game.putO(signal.move)
-                    }
+                }.last()
+                when (final) {
                     is EndState -> {
-                        val winner = when (val state = signal.state) {
-                            is Win -> state.line.mark
+                        val winner = when (val state = final.state) {
+                            is Win -> with(state.line) {
+                                if (start != null && end != null) {
+                                    game.putWinLine(start!!, end!!, mark)
+                                }
+                                mark
+                            }
+
                             is Tie -> Mark.Empty
                             else -> throw IllegalArgumentException("expected to be WIN or TIE State")
                         }
-                        backstack.dialogs.show(GameResult(winner))
+                        gameController.showGameResult(winner)
+                        game.clear()
                     }
+
                     is GameInterruption -> {
-                        backstack.dialogs.show(GameError(signal.cause))
+                        backstack.dialogs.show(GameError(final.cause))
+                        return@launch
+                    }
+                    else -> throw IllegalStateException()
+                }
+            }
+        }
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        return RootLinearLayoutBinding.inflate(inflater, container, false).apply {
+            game = GameComponent(
+                root,
+                GameState(config.rows, config.cols, gameController.reloadGame())
+            )
+        }.getRoot()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val scope = viewLifecycleOwner.lifecycleScope
+        scope.launch {
+            gameController.moveRegister.listenerState.collect { accept ->
+                if (accept) game.acceptMoves() else game.rejectMoves()
+            }
+        }
+        scope.launch {
+            game.getUserInteractionEvents().collect { move ->
+                gameController.moveRegister.sendMove(move)
+            }
+        }
+        setGameObserver(scope)
+
+        //viewLifecycleOwner.lifecycleScope.
+        view.doOnLayout {
+            if (!gameConfigured) {
+                configureGame()
+                gameConfigured = true
+            }
+        }
+    }
+
+    private fun configureGame() {
+        Log.d(TAG, "configured game")
+        Log.d(TAG, "type: ${config.gameType}")
+        when (val type = config.gameType) {
+            GameType.Local -> {
+                Log.d(TAG, "type: local game")
+                gameController.setupLocalGame(config.player1, config.player2)
+            }
+            GameType.BluetoothClassic, GameType.BluetoothLE, GameType.Network -> {
+                println("network game")
+                val interconnectedPlayer = type.toPlayerType()
+                println("player: $interconnectedPlayer")
+                when {
+                    config.player1 == interconnectedPlayer -> {
+                        Log.d(TAG, "condition 1")
+                        println("condition 1")
+                        gameController.setupInterconnectedGame(Mark.Nought, config.player2)
+                    }
+                    config.player2 == interconnectedPlayer -> {
+                        Log.d(TAG, "condition 2")
+                        gameController.setupInterconnectedGame(Mark.Cross, config.player1)
                     }
                 }
             }
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return RootLinearLayoutBinding.inflate(inflater, container, false).apply {
-            game = GameComponent(root, GameState(config.rows, config.cols, gameController.reloadGame()))
-        }.getRoot()
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val moveLisener = gameController.clickRegister()
-        val scope = viewLifecycleOwner.lifecycleScope
-        scope.launch {
-            moveLisener.listenerStateFlow.collect { accept ->
-                if (accept) game.acceptMoves() else game.rejectMoves()
-            }
+    // return playerType for interconnected game
+    private fun GameType.toPlayerType(): PlayerType {
+        return when (this) {
+            GameType.Network -> PlayerType.Network
+            GameType.BluetoothLE, GameType.BluetoothClassic -> PlayerType.Bluetooth
+            GameType.Local -> throw IllegalStateException()
         }
-        scope.launch {
-            game.getUserInteractionEvents().collect { move ->
-                moveLisener.moveTo(move)
-            }
-        }
-        setGameObserver(scope)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         config.apply {
             Log.d(TAG, "fragment: $this@GameFragment")
-            Log.d(TAG, "Game initialized rows:$rows, cols:$cols, win:$win, playerX:$player1, playerO:$player2")
-        }
-        if (!gameController.isStarted()) {
-            gameController.startGame()
+            Log.d(
+                TAG,
+                "Game initialized rows:$rows, cols:$cols, win:$win, playerX:$player1, playerO:$player2"
+            )
+            Log.d(
+                TAG,
+                "Game Type: $gameType"
+            )
         }
     }
 
@@ -105,6 +168,7 @@ class GameFragment : BaseFragment() {
         if (notifications.shown) {
             notifications.closeNotification()
         }
+
         Log.d(TAG, "start: ")
     }
 

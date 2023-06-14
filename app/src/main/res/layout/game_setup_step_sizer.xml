@@ -7,70 +7,42 @@
     android:orientation="vertical"
     tools:parentTag="android.widget.LinearLayout">
 
-    <LinearLayout
+    <SeekBar
+        android:id="@+id/rows"
+        style="@style/Widget.AppCompat.SeekBar.Discrete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/rowsnum"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:gravity="center"
-        android:orientation="vertical">
+        tools:text="@string/rows_num" />
 
-        <SeekBar
-            android:id="@+id/rows"
-            style="@style/Widget.AppCompat.SeekBar.Discrete"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+    <SeekBar
+        android:id="@+id/cols"
+        style="@style/Widget.AppCompat.SeekBar.Discrete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/rowsnum"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            tools:text="@string/rows_num" />
-
-    </LinearLayout>
-
-    <LinearLayout
+    <TextView
+        android:id="@+id/colsnum"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:focusable="false"
         android:gravity="center"
-        android:orientation="vertical">
+        tools:text="@string/cols_num" />
 
-        <SeekBar
-            android:id="@+id/cols"
-            style="@style/Widget.AppCompat.SeekBar.Discrete"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+    <SeekBar
+        android:id="@+id/win"
+        style="@style/Widget.AppCompat.SeekBar.Discrete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/colsnum"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            tools:text="@string/cols_num" />
-    </LinearLayout>
-
-    <LinearLayout
+    <TextView
+        android:id="@+id/winnum"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:focusable="false"
         android:gravity="center"
-        android:orientation="vertical">
-
-        <SeekBar
-            android:id="@+id/win"
-            style="@style/Widget.AppCompat.SeekBar.Discrete"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/winnum"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            tools:text="@string/rowl_num" />
-    </LinearLayout>
-
+        tools:text="@string/rowl_num" />
 </merge>

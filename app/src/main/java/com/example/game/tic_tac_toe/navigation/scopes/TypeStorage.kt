@@ -1,6 +1,6 @@
 package com.example.game.tic_tac_toe.navigation.scopes
 
-import com.example.game.controllers.models.GameType
+import com.example.controllers.models.GameType
 import com.example.game.tic_tac_toe.navigation.base.ScreenBase
 import com.example.game.tic_tac_toe.navigation.screens.ChooseScreen
 import com.example.game.tic_tac_toe.navigation.screens.GameConfigurationScreen
@@ -27,8 +27,9 @@ class TypeStorage(private val backstack: Backstack) : Bundleable {
     private fun getDirection(gameType: GameType): ScreenBase {
         return when (gameType) {
             GameType.Local -> GameConfigurationScreen()
-            GameType.Bluetooth -> ChooseScreen()
+            GameType.BluetoothClassic -> ChooseScreen()
             GameType.Network -> ChooseScreen()
+            GameType.BluetoothLE -> ChooseScreen()
         }
     }
 }

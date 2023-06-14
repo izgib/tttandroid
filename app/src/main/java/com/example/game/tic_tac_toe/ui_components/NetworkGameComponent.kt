@@ -1,9 +1,13 @@
 package com.example.game.tic_tac_toe.ui_components
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import com.example.game.tic_tac_toe.databinding.NetworkGameBinding
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
 class NetworkGameComponent(private val container: ViewGroup) : UIComponent<PlayerAction> {
     private val binding = inflateView()
@@ -17,11 +21,13 @@ class NetworkGameComponent(private val container: ViewGroup) : UIComponent<Playe
         with(binding) {
             val flow = callbackFlow<PlayerAction> {
                 val clickListener = View.OnClickListener { v ->
-                    sendBlocking(when (v.id) {
-                        netCreateGame.id -> Create
-                        netFindEnemy.id -> Find
-                        else -> throw IllegalStateException()
-                    })
+                    trySendBlocking(
+                        when (v.id) {
+                            netCreateGame.id -> Create
+                            netFindEnemy.id -> Find
+                            else -> throw IllegalStateException()
+                        }
+                    )
                 }
                 netCreateGame.setOnClickListener(clickListener)
                 netFindEnemy.setOnClickListener(clickListener)

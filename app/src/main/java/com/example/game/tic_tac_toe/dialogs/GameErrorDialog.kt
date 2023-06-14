@@ -4,7 +4,7 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
-import com.example.game.controllers.models.InterruptCause
+import com.example.controllers.models.InterruptCause
 import com.example.game.tic_tac_toe.navigation.base.backstack
 
 
@@ -19,7 +19,7 @@ class GameErrorDialog : DialogFragment() {
         private const val leave = "Потеряно соединение с противником"
         private const val disconnect = "Потеряная связь с сервером"
         private const val oppCheating = "Противник использует читы"
-        private const val cheating = "Отсоединен от сервера из-за использования читов"
+        private const val internal = "Внутреняя ошибка"
 
         fun newInstance(cause: InterruptCause) = GameErrorDialog().apply {
             arguments = (arguments ?: Bundle()).also { bundle ->
@@ -31,10 +31,10 @@ class GameErrorDialog : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(requireContext())
         val msg = when (cause) {
-            InterruptCause.OppLeave -> leave
+            InterruptCause.Leave -> leave
             InterruptCause.Disconnected -> disconnect
-            InterruptCause.OppCheating -> oppCheating
-            InterruptCause.Cheating -> cheating
+            InterruptCause.InvalidMove -> oppCheating
+            InterruptCause.Internal -> internal
         }
         builder.setMessage(msg)
                 .setCancelable(false)

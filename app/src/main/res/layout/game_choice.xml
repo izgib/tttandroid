@@ -22,7 +22,15 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="Игра по блютузу" />
+        android:text="Игра по Bluetooth" />
+
+    <Button
+        android:id="@+id/btlegame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Игра по Bluetooth LE" />
 
     <Button
         android:id="@+id/netgame"

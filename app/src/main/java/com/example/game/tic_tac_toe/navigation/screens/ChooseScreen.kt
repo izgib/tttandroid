@@ -8,7 +8,7 @@ import com.example.game.tic_tac_toe.navigation.base.lookup
 import com.example.game.tic_tac_toe.navigation.scopes.CreatorStorage
 import com.example.game.tic_tac_toe.network.NetworkGame
 import com.zhuinden.simplestack.ServiceBinder
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class ChooseScreen : ScreenBase(), HasServices {
@@ -18,7 +18,8 @@ class ChooseScreen : ScreenBase(), HasServices {
 
     override fun bindServices(serviceBinder: ServiceBinder) {
         with(serviceBinder) {
-            add(CreatorStorage(lookup(), backstack))
+            add(
+                CreatorStorage(lookup(), backstack))
         }
     }
 }

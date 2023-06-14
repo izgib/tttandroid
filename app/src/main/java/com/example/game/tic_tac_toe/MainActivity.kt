@@ -7,29 +7,30 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.game.networking.device.BluetoothCommand
-import com.example.game.networking.device.BluetoothSensor
-import com.example.game.networking.device.NetworkSensor
 import com.example.game.tic_tac_toe.databinding.ViewHierarchyRootBinding
 import com.example.game.tic_tac_toe.navigation.base.FragmentStateChanger
 import com.example.game.tic_tac_toe.navigation.base.ServiceProvider
 import com.example.game.tic_tac_toe.navigation.base.add
+import com.example.game.tic_tac_toe.navigation.base.bluetooth
 import com.example.game.tic_tac_toe.navigation.base.dialogs.DialogService
 import com.example.game.tic_tac_toe.navigation.screens.MainScreen
 import com.example.game.tic_tac_toe.notifications.NotificationsManager
+import com.example.game.tic_tac_toe.sensors.NetworkSensor
+import com.example.transport.BluetoothLEInteractor
+import com.example.transport.BluetoothLEInteractorImpl
+import com.example.transport.device.BluetoothCommand
+import com.example.transport.device.BluetoothLESensor
+import com.example.transport.device.BluetoothSensor
 import com.zhuinden.simplestack.GlobalServices
 import com.zhuinden.simplestack.History
 import com.zhuinden.simplestack.navigator.Navigator
-import kotlinx.android.synthetic.main.view_hierarchy_root.*
-import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
-import kotlin.time.Duration
-import kotlin.time.DurationUnit
-import kotlin.time.ExperimentalTime
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var btSensor: BluetoothSensor
+    private val btSensor by lazy { Navigator.getBackstack(this).bluetooth }
     private lateinit var fragmentStateChanger: FragmentStateChanger
 
     companion object {
@@ -38,41 +39,32 @@ class MainActivity : AppCompatActivity() {
         private const val REQUEST_MAKE_DISCOVERABLE_BT: Int = 2
     }
 
-    @ExperimentalTime
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(ViewHierarchyRootBinding.inflate(layoutInflater).getRoot())
+        val root = ViewHierarchyRootBinding.inflate(layoutInflater).getRoot()
+        setContentView(root)
 
         fragmentStateChanger = FragmentStateChanger(supportFragmentManager, root.id)
 
         Navigator.configure()
-                .setStateChanger(fragmentStateChanger)
-                .setScopedServices(ServiceProvider())
-                .setGlobalServices { backstack ->
-                    GlobalServices.builder()
-                            .add(DialogService(backstack))
-                            .add(BluetoothSensor(applicationContext).also { sensor ->
-                                btSensor = sensor
-                            })
-                            .add(NetworkSensor(applicationContext))
-                            .add(NotificationsManager(application))
-                            .build()
-                }
-                .install(this, root, History.of(MainScreen()))
+            .setStateChanger(fragmentStateChanger)
+            .setScopedServices(ServiceProvider())
+            .setGlobalServices { backstack ->
+                GlobalServices.builder()
+                    .add(DialogService(backstack))
+                    .add(BluetoothSensor(applicationContext))
+                    .add(NetworkSensor(applicationContext))
+                    .add(BluetoothLESensor(applicationContext))
+                    .add(NotificationsManager(application))
+                    .add<BluetoothLEInteractor>(BluetoothLEInteractorImpl(applicationContext))
+                    .build()
+            }
+            .install(this, root, History.of(MainScreen()))
 
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
         supportActionBar?.hide()
-        lifecycleScope.launchWhenStarted {
-            btSensor.commandFlow.filterNotNull().collect { command ->
-                when (command) {
-                    is BluetoothCommand.Enable -> enableBluetooth()
-                    is BluetoothCommand.MakeDiscoverable -> makeDiscoverable(command.discoveryTime)
-                }
-            }
-        }
     }
 
-    @ExperimentalTime
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_ENABLE_BT) {
@@ -82,7 +74,7 @@ class MainActivity : AppCompatActivity() {
                 RESULT_CANCELED -> false
                 else -> throw IllegalArgumentException("WTF")
             }
-            request.respChannel.sendBlocking(enabled)
+            request.respChannel.trySendBlocking(enabled)
             request.respChannel.close()
             btSensor.commandExecuted()
         }
@@ -90,9 +82,9 @@ class MainActivity : AppCompatActivity() {
             val request = btSensor.commandFlow.value!! as BluetoothCommand.MakeDiscoverable
             val discoverable = when (resultCode) {
                 RESULT_CANCELED -> false
-                else -> resultCode == request.discoveryTime.toInt(DurationUnit.SECONDS)
+                else -> resultCode == request.timeSec
             }
-            request.respChannel.sendBlocking(discoverable)
+            request.respChannel.trySendBlocking(discoverable)
             request.respChannel.close()
             btSensor.commandExecuted()
         }
@@ -104,17 +96,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     // duration is seconds
-    @ExperimentalTime
-    private fun makeDiscoverable(discoveryTime: Duration) {
+    private fun makeDiscoverable(timeSec: Int) {
         val discoverableIntent = Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
-            putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, discoveryTime.toInt(DurationUnit.SECONDS))
+            putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, timeSec * 1000)
         }
         startActivityForResult(discoverableIntent, REQUEST_MAKE_DISCOVERABLE_BT)
     }
 
     override fun onStart() {
         super.onStart()
+        if (btSensor.haveBt) {
+            lifecycleScope.launchWhenStarted {
+                btSensor.commandFlow.filterNotNull().collect { command ->
+                    when (command) {
+                        is BluetoothCommand.Enable -> enableBluetooth()
+                        is BluetoothCommand.MakeDiscoverable -> makeDiscoverable(command.timeSec)
+                    }
+                }
+            }
+        }
+
         Log.d(TAG, "activity started")
+        if (Navigator.isNavigatorAvailable(this)) {
+            println("navigator available")
+        }
+        /*        lifecycleScope.launch {
+                    btSensor.commandFlow.filterNotNull().collect { command ->
+                        when (command) {
+                            is BluetoothCommand.Enable -> enableBluetooth()
+                            is BluetoothCommand.MakeDiscoverable -> makeDiscoverable(command.timeSec)
+                        }
+                    }
+                }*/
     }
 
     override fun onResume() {

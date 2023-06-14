@@ -16,7 +16,7 @@
             android:background="@drawable/circle"
             android:backgroundTint="@color/material_blue_500"
             android:text="1"
-            android:textColor="@color/ms_white"
+            android:textColor="#FFFFFF"
             android:textSize="12sp" />
 
         <TextView
@@ -38,7 +38,7 @@
             android:background="@drawable/circle"
             android:backgroundTint="@color/material_blue_500"
             android:text="2"
-            android:textColor="@color/ms_white"
+            android:textColor="#000000"
             android:textSize="12sp" />
 
         <TextView

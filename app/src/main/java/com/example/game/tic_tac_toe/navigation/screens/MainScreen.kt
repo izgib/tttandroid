@@ -7,7 +7,7 @@ import com.example.game.tic_tac_toe.navigation.base.ScreenBase
 import com.example.game.tic_tac_toe.navigation.base.add
 import com.example.game.tic_tac_toe.navigation.scopes.TypeStorage
 import com.zhuinden.simplestack.ServiceBinder
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 class MainScreen : ScreenBase(), HasServices {

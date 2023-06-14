@@ -3,11 +3,11 @@ package com.example.game.tic_tac_toe.ui_components
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.appyvet.materialrangebar.RangeBar
-import com.example.game.controllers.models.Range
-import com.example.game.domain.game.Mark
+import com.example.controllers.models.Range
+import com.example.game.Mark
 import com.example.game.tic_tac_toe.databinding.GameFindSettingsBinding
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.sendBlocking
+import kotlinx.coroutines.channels.trySendBlocking
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlin.properties.Delegates
@@ -82,15 +82,19 @@ class GameFindComponent(private val container: ViewGroup, state: GameFindState) 
             findGame.isEnabled = !state.searching
             findSettings = callbackFlow {
                 findGame.setOnClickListener {
-                    sendBlocking(FindGames)
+                    trySendBlocking(FindGames)
                 }
                 markConfig.setOnCheckedChangeListener { group, checkedId ->
-                    sendBlocking(MarkSettings(when (checkedId) {
-                        crossMark.id -> Mark.Cross
-                        noughtMark.id -> Mark.Nought
-                        anyMark.id -> Mark.Empty
-                        else -> throw IllegalStateException()
-                    }))
+                    trySendBlocking(
+                        MarkSettings(
+                            when (checkedId) {
+                                crossMark.id -> Mark.Cross
+                                noughtMark.id -> Mark.Nought
+                                anyMark.id -> Mark.Empty
+                                else -> throw IllegalStateException()
+                            }
+                        )
+                    )
                 }
                 val rangeListener = object : RangeBar.OnRangeBarChangeListener {
                     override fun onTouchEnded(rangeBar: RangeBar) {
@@ -103,15 +107,34 @@ class GameFindComponent(private val container: ViewGroup, state: GameFindState) 
                             end = rangeBar.leftIndex
                             rangeBar.rightIndex
                         }
-                        sendBlocking(when (rangeBar.id) {
-                            rowsRange.id -> Rows(start + state.rowRange.start, end + state.rowRange.start)
-                            colsRange.id -> Cols(start + state.colRange.start, end + state.colRange.start)
-                            winRange.id -> Win(start + state.winRange.start, end + state.winRange.start)
-                            else -> throw IllegalStateException()
-                        })
+                        trySendBlocking(
+                            when (rangeBar.id) {
+                                rowsRange.id -> Rows(
+                                    start + state.rowRange.start,
+                                    end + state.rowRange.start
+                                )
+                                colsRange.id -> Cols(
+                                    start + state.colRange.start,
+                                    end + state.colRange.start
+                                )
+                                winRange.id -> Win(
+                                    start + state.winRange.start,
+                                    end + state.winRange.start
+                                )
+                                else -> throw IllegalStateException()
+                            }
+                        )
                     }
 
-                    override fun onRangeChangeListener(rangeBar: RangeBar, leftPinIndex: Int, rightPinIndex: Int, leftPinValue: String?, rightPinValue: String?) {}
+                    override fun onRangeChangeListener(
+                        rangeBar: RangeBar,
+                        leftPinIndex: Int,
+                        rightPinIndex: Int,
+                        leftPinValue: String?,
+                        rightPinValue: String?
+                    ) {
+                    }
+
                     override fun onTouchStarted(rangeBar: RangeBar) {}
                 }
                 rowsRange.setOnRangeBarChangeListener(rangeListener)

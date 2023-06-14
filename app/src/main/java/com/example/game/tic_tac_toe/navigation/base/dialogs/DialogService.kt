@@ -9,9 +9,9 @@ import com.zhuinden.simplestack.Backstack
 import com.zhuinden.simplestack.ScopeKey
 import com.zhuinden.simplestack.ServiceBinder
 import com.zhuinden.simplestack.StateChange
-import kotlinx.android.parcel.IgnoredOnParcel
-import kotlinx.android.parcel.Parcelize
-import kotlinx.android.parcel.WriteWith
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.WriteWith
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -39,12 +39,12 @@ class DialogService(private val backstack: Backstack) {
                     backstack.lookup<ResultHandler<T>>()
                             .onResultListener(object : ResultHandler.Listener<T?> {
                                 override fun onResult(result: T?) {
+                                    backstack.dialogs.goBack(false)
                                     cont.resume(result)
                                 }
                             })
                 }
             }
-
         })
         show(dialog)
     }
@@ -133,7 +133,6 @@ private data class DialogCurator
         return scopes
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     fun add(dialog: DialogBase) {
         historyStack.addLast(dialog)
         val stateChange =
@@ -144,7 +143,7 @@ private data class DialogCurator
         pendingStateChange = stateChange
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
+
     fun remove(notify: Boolean = true) {
         val removable = historyStack.removeLast()
         pendingStateChange = if (notify) {

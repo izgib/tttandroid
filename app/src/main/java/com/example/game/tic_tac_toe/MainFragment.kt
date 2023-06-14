@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MainFragment : BaseFragment() {
-    private val gameType: TypeStorage by lazy { lookup<TypeStorage>() }
+    private val gameType: TypeStorage by lazy { lookup() }
     private lateinit var container: ViewGroup
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -24,7 +24,6 @@ class MainFragment : BaseFragment() {
         return this.container
     }
 
-    @OptIn(InternalCoroutinesApi::class)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         viewLifecycleOwner.lifecycle.coroutineScope.launch {
             GameTypeComponent(container).getUserInteractionEvents().collect { type ->

@@ -1,26 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="?android:attr/windowBackground">
+    android:layout_height="wrap_content"
+    tools:viewBindingIgnore="true">
 
-    <fragment
-        android:id="@+id/sizeSetup"
-        class="com.example.game.tic_tac_toe.gamesetup.GameSetupSizer"
+    <SeekBar
+        android:id="@+id/rows"
+        style="@style/Widget.AppCompat.SeekBar.Discrete"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        tools:layout="@layout/game_setup_step_sizer" />
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:max="12" />
 
-    <fragment
-        android:id="@+id/playersSetup"
-        class="com.example.game.tic_tac_toe.gamesetup.GameSetupPlayers"
+    <TextView
+        android:id="@+id/rowsnum"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/rows"
+        tools:text="@string/rows_num" />
+
+    <SeekBar
+        android:id="@+id/cols"
+        style="@style/Widget.AppCompat.SeekBar.Discrete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/rowsnum"
+        tools:max="12" />
+
+    <TextView
+        android:id="@+id/colsnum"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/cols"
+        tools:text="@string/cols_num" />
+
+    <SeekBar
+        android:id="@+id/win"
+        style="@style/Widget.AppCompat.SeekBar.Discrete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/colsnum"
+        tools:max="5" />
+
+    <TextView
+        android:id="@+id/winnum"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/win"
+        tools:text="@string/rowl_num" />
+
+    <TextView
+        android:id="@+id/player1"
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        tools:layout="@layout/game_setup_step_players" />
+        android:text="player"
+        app:layout_constraintBottom_toBottomOf="@id/playerX"
+        app:layout_constraintEnd_toStartOf="@+id/playerX"
+        app:layout_constraintStart_toEndOf="@id/reshuffle"
+        app:layout_constraintTop_toTopOf="@id/playerX" />
+
+    <ImageView
+        android:id="@+id/playerX"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="TODO"
+        app:layout_constraintBottom_toTopOf="@+id/playerO"
+        app:layout_constraintEnd_toStartOf="@+id/playerXSpinner"
+        app:layout_constraintStart_toEndOf="@+id/player1"
+        app:layout_constraintTop_toBottomOf="@+id/winnum"
+        app:srcCompat="@drawable/ic_cross" />
+
+    <Spinner
+        android:id="@+id/playerXSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/playerX"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/playerX"
+        app:layout_constraintTop_toTopOf="@+id/playerX" />
+
+    <TextView
+        android:id="@+id/player2"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="player"
+        app:layout_constraintBottom_toBottomOf="@id/playerO"
+        app:layout_constraintEnd_toStartOf="@+id/playerO"
+        app:layout_constraintTop_toTopOf="@id/playerO" />
+
+    <ImageView
+        android:id="@+id/playerO"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="TODO"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/playerOSpinner"
+        app:layout_constraintStart_toStartOf="@id/playerX"
+        app:layout_constraintEnd_toEndOf="@id/playerX"
+        app:layout_constraintStart_toEndOf="@+id/player2"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5"
+        app:srcCompat="@drawable/ic_nought" />
+
+    <Spinner
+        android:id="@+id/playerOSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/playerO"
+        app:layout_constraintStart_toEndOf="@+id/playerO"
+        app:layout_constraintTop_toTopOf="@+id/playerO" />
 
 
-</LinearLayout>
+    <ImageButton
+        android:id="@+id/reshuffle"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@null"
+        android:contentDescription="TODO"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="@id/playerO"
+        app:layout_constraintDimensionRatio="1"
+        app:layout_constraintEnd_toStartOf="@+id/player1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/playerX"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:srcCompat="@drawable/ic_loop_24dp" />
+
+    <Button
+        android:id="@+id/game_create"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Создать игру"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/playerO" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

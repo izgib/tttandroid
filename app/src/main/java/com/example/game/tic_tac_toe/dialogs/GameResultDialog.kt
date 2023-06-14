@@ -7,16 +7,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
-import com.example.game.domain.game.Mark
+import com.example.game.Mark
 import com.example.game.tic_tac_toe.databinding.GameResultLayoutBinding
 import com.example.game.tic_tac_toe.navigation.base.backstack
+import com.example.game.tic_tac_toe.navigation.base.dialogs
+import com.example.game.tic_tac_toe.navigation.base.dialogs.BaseDialogFragment
+import com.example.game.tic_tac_toe.navigation.screens.dialogs.MenuResponse
 
 const val GRD_TAG = "GameResultDialog"
 
-class GameResultDialog : DialogFragment() {
+class GameResultDialog : BaseDialogFragment() {
+    private val handler by lazy { getResultHandler<Unit>() }
+
     override fun onCancel(dialog: DialogInterface) {
         Log.d(GRD_TAG, "dialog canceled")
-        backstack.jumpToRoot()
+        handler.result = Unit
     }
 
     private fun getWinner(): Mark = requireArguments().getSerializable(WINNER_KEY) as Mark
@@ -40,9 +45,11 @@ class GameResultDialog : DialogFragment() {
                     playerO.alpha = tieAlpha
                 }
             }
-        }.root
-
-
+        }.root.apply {
+            setOnClickListener {
+                dialog!!.cancel()
+            }
+        }
     }
 
     companion object {

@@ -3,36 +3,72 @@ package com.example.game.tic_tac_toe.ui_components
 import android.view.View
 import android.widget.Button
 import android.widget.ProgressBar
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
-import kotlin.time.Duration
-import kotlin.time.ExperimentalTime
+import kotlin.properties.Delegates
 
-@ExperimentalTime
-class ButtonProgressComponent(private val button: Button, private val progress: ProgressBar, state: ButtonProgressState) : UIComponent<Unit> {
-    private val callback: Flow<Unit>
+
+class ButtonProgressComponent(
+    private val button: Button,
+    private val progress: ProgressBar,
+    val state: ProgressState
+) : UIComponent<Boolean> {
+    var enabled: Boolean
+        get() = internalState
+        set(value) {
+            internalState = value
+        }
+
+    private val callback: Flow<Boolean>
+
+    private var internalState: Boolean by Delegates.observable(state.enabled) { property, oldValue, newValue ->
+        if (!newValue) {
+            if (oldValue) internalJob?.cancel().also {
+                internalJob = null
+            }
+            progress.progress = 0
+        }
+        button.text = buttonText
+        progress.visibility = progressVisibility
+    }
 
     override fun getUserInteractionEvents() = callback
 
+    private val buttonText: String
+        get() = if (internalState) state.enabledLabel else state.disabledLabel
+    private val progressVisibility: Int
+        get() = if (internalState) View.VISIBLE else View.GONE
+
+    private var internalJob: Job? = null
+
     init {
         progress.max = state.steps
-        callback = callbackFlow<Unit> {
-            button.setOnClickListener { button ->
-                button.isClickable = false
-                sendBlocking(Unit)
-                progress.visibility = View.VISIBLE
-                this.launch {
-                    repeat(state.steps) {
-                        delay(state.totalTime.div(state.steps))
-                        progress.incrementProgressBy(1)
+        progress.isIndeterminate = when (state) {
+            is IndeterminateProgress -> true
+            is DeterminateProgress -> false
+        }
+
+        button.text = buttonText
+        progress.visibility = progressVisibility
+
+        callback = callbackFlow<Boolean> {
+            button.setOnClickListener {
+                trySend(!internalState)
+                if (internalState && state is DeterminateProgress) {
+                    val step = state.timeMillis / state.steps
+                    internalJob = launch {
+                        repeat(state.steps) {
+                            delay(step)
+                            progress.incrementProgressBy(1)
+                        }
+                        internalJob = null
+                        internalState = !internalState
+                        trySend(internalState)
                     }
-                    progress.visibility = View.GONE
-                    progress.progress = 0
-                    button.isClickable = true
                 }
             }
             awaitClose()
@@ -40,4 +76,18 @@ class ButtonProgressComponent(private val button: Button, private val progress: 
     }
 }
 
-data class ButtonProgressState @ExperimentalTime constructor(val steps: Int, val totalTime: Duration)
+sealed class ProgressState(
+    val enabled: Boolean,
+    val steps: Int,
+    val enabledLabel: String,
+    val disabledLabel: String
+)
+
+class DeterminateProgress(
+    enabled: Boolean, steps: Int, val timeMillis: Long, enabledLabel: String, disabledLabel: String
+) : ProgressState(enabled, steps, enabledLabel, disabledLabel)
+
+class IndeterminateProgress(
+    enabled: Boolean, steps: Int, enabledLabel: String,
+    disabledLabel: String
+) : ProgressState(enabled, steps, enabledLabel, disabledLabel)

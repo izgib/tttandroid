@@ -11,7 +11,7 @@
         <path
             android:name="icon"
             android:fillColor="@android:color/black"
-            android:pathData="@string/ms_circle_path" />
+            android:pathData="@string/circle_path" />
 
     </group>
 
