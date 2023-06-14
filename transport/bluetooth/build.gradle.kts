@@ -425,7 +425,8 @@ tasks.named<Test>("jvmTest") {
             systemProperty("deviceName", deviceName)
             systemProperty("macAddress", macAddress)
             systemProperty("serverFirst", 1)
-        
+
+        }
     }
 }
 
@@ -491,8 +492,8 @@ val startBluetooth by tasks.registering(JavaExecFork::class) {
     //dependsOn(getAndroidBluetoothInfoTest)
     //println("enabledLocation: ${getAndroidBluetoothInfoTest.get().enableLocationManager.get()}")
     doFirst {
-        /*val androidBluetooth = getAndroidBluetoothInfoTest.get()
-        println("enabledLocation: ${androidBluetooth.enableLocationManager.get()}")*/
+        val androidBluetooth = getAndroidBluetoothInfoTest.get()
+        println("enabledLocation: ${androidBluetooth.enableLocationManager.get()}")
         systemProperties(
             "deviceName" to androidBluetooth.deviceName,
             "macAddress" to androidBluetooth.macAddress,
@@ -551,8 +552,6 @@ println("androidBluetooth registered")
     }
 
 }*/
-
-kotlin.jvmToolchain(8)
 
 /*gradle.taskGraph.whenReady {
     if (hasTask(tasks.getByName("build"))) {
