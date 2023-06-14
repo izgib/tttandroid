@@ -114,4 +114,4 @@ class GameRules {
     }
 }
 
-data class EndWinLine(val mark: Mark, val start: ICoord, val end: ICoord)
+data class EndWinLine(val mark: Mark, val start: Coord?, val end: Coord?)

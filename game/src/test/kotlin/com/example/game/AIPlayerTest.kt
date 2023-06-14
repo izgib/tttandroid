@@ -1,15 +1,10 @@
-import com.example.game.AIPlayer
-import com.example.game.Continues
-import com.example.game.Coord
-import com.example.game.Game
-import com.example.game.GameState
-import com.example.game.PotentialMap
-import com.example.game.Tie
-import com.example.game.Win
+package com.example.game
+
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.RepeatedTest
 import org.junit.jupiter.api.Test
+import kotlin.math.max
 import kotlin.random.Random
 
 private class GameCycle(val game: Game) {
@@ -77,32 +72,16 @@ private class GameCycle(val game: Game) {
         for (i in moves.indices) {
             println("turn: $i")
             println("player X")
-            printPotentialMap(plXownPotential[i])
+            printPotentialMap(playerX, plXownPotential[i])
             println()
-            printPotentialMap(plXoppPotential[i])
+            printPotentialMap(playerX, plXoppPotential[i])
             println()
             println("player O")
-            printPotentialMap(plOownPotential[i])
+            printPotentialMap(playerO, plOownPotential[i])
             println()
-            printPotentialMap(plOoppPotential[i])
+            printPotentialMap(playerO, plOoppPotential[i])
             println("player${if (i and 1 == 0) "X" else "O"} move: ${moves[i]}")
             println("".padEnd(60, '-'))
-        }
-    }
-
-    private fun printPotentialMap(map: PotentialMap) {
-        val pad = 6
-        for ((_, row) in map.withIndex()) {
-            val part = StringBuilder("|")
-            for ((_, potential) in row.withIndex()) {
-                when (potential) {
-                    playerX.usedCap -> part.append("X".padStart(pad))
-                    -1 -> part.append("O".padStart(pad))
-                    else -> part.append(potential.toString().padStart(6))
-                }
-                part.append('|')
-            }
-            println(part)
         }
     }
 
@@ -120,6 +99,32 @@ private class GameCycle(val game: Game) {
         plOoppPotential.add(with(playerO.oppPotentialMap) {
             PotentialMap(count()) { i -> get(i).copyOf() }
         })
+    }
+}
+
+fun printPotentialMap(aiPlayer: AIPlayer, map: PotentialMap) {
+    var m = map.maxOf { row -> row.maxOf { when (it) {
+        -1, aiPlayer.usedCap -> -1
+        else -> it }
+    } }
+    var pad = 1
+    while (m > 10) {
+        m = m.div(10)
+        pad++
+    }
+
+    for ((_, row) in map.withIndex()) {
+        val part = StringBuilder("|")
+
+        for ((_, potential) in row.withIndex()) {
+            when (potential) {
+                aiPlayer.usedCap -> part.append("X".padStart(pad))
+                -1 -> part.append("O".padStart(pad))
+                else -> part.append(potential.toString().padStart(pad))
+            }
+            part.append('|')
+        }
+        println(part)
     }
 }
 
@@ -144,7 +149,6 @@ internal class AIPlayerTest {
                     intArrayOf(9, 6, 9)
             )
             compareMap(potentials)
-
         }
 
         @Test
@@ -247,6 +251,7 @@ internal class AIPlayerTest {
                     throw AssertionError { "expect that game will be tied but, ${state.line.mark.name} won the game" }
                 }
                 is Tie -> return
+                Continues -> throw IllegalStateException()
             }
         }
 
@@ -263,6 +268,7 @@ internal class AIPlayerTest {
                     AssertionError({ "expect that game will be tied but, ${state.line.mark.name} won the game" })
                 }
                 is Tie -> return
+                Continues -> throw IllegalStateException()
             }
         }
 
@@ -280,6 +286,7 @@ internal class AIPlayerTest {
                     cycle.printGameDebug()
                     throw AssertionError({ "expect that playerX won this game but, it was tied" })
                 }
+                Continues -> throw IllegalStateException()
             }
         }
     }

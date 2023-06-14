@@ -220,9 +220,9 @@ class AIPlayer(private val controller: GameController) {
                     val value = max(cell, oppPotentialMap[rowInd][colInd])
                     if (value > max) {
                         maxValues.clear()
-                        maxValues.add(Coord(rowInd, colInd))
                         max = value
                     }
+                    if (value == max) maxValues.add(Coord(rowInd, colInd))
                 }
             }
         }

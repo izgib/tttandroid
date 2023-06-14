@@ -6,16 +6,6 @@ open class GameController(internal val rows: Int, internal val cols: Int, intern
     internal val gameField: Array<Array<Mark>> = Array(rows) { Array(cols) { Mark.Empty } }
     var turn = 0
 
-    fun getEmptyCells(): Sequence<Coord> = sequence {
-        for ((i, row) in gameField.withIndex()) {
-            for ((j, item) in row.withIndex()) {
-                if (item == Mark.Empty) {
-                    yield(Coord(i, j))
-                }
-            }
-        }
-    }
-
     fun moveTo(move: Coord) {
         gameField[move.row][move.col] = marks[curPlayer()]
     }
@@ -39,5 +29,12 @@ open class GameController(internal val rows: Int, internal val cols: Int, intern
             }
         }
         return MarkLists(crosses, noughts)
+    }
+
+    fun clearField() {
+        gameField.forEachIndexed { i, row ->
+            row.forEachIndexed { j, _ -> gameField[i][j] = Mark.Empty }
+        }
+        turn = 0
     }
 }

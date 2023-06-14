@@ -1,9 +1,5 @@
-import com.example.game.Continues
-import com.example.game.Coord
-import com.example.game.EndWinLine
-import com.example.game.Game
-import com.example.game.GameState
-import com.example.game.Mark
+package com.example.game
+
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
