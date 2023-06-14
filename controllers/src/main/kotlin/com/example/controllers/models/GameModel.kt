@@ -1,9 +1,7 @@
 package com.example.controllers.models
 
-import com.example.controllers.ClickRegister
-import com.example.game.Coord
-import com.example.game.GameController
-import com.example.game.GameState
+import com.example.controllers.LocalPlayer
+import com.example.game.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -15,20 +13,13 @@ enum class PlayerType {
 }
 
 
-abstract class GameModel(val rows: Int, val cols: Int, val win: Int, player1: PlayerType, player2: PlayerType, internal val scope: CoroutineScope) {
-    protected abstract val controller: GameController
+abstract class GameModel(val rows: Int, val cols: Int, val win: Int, internal val scope: CoroutineScope) {
+    internal abstract val controller: GameController
+    internal abstract val gameChannel: Channel<GameSignal>
     abstract val gameLoop: Job
-    internal val gameChannel = Channel<GameSignal>(2)
     internal var endSignal: GameSignal? = null
     val gameFlow
-        get() = gameChannel.receiveAsFlow().onStart {
-            if (endSignal != null) {
-                emit(endSignal!!)
-            }
-        }
-
-    val clickRegister: ClickRegister by lazy { ClickRegister(controller::isValidMove) }
-
+        get() = gameChannel.receiveAsFlow()
 
     internal suspend fun moveTo(move: Coord) {
         controller.moveTo(move)
@@ -39,11 +30,20 @@ abstract class GameModel(val rows: Int, val cols: Int, val win: Int, player1: Pl
         })
     }
 
-    fun start() {
-        gameLoop.start()
+    abstract fun start()
+
+
+    // Field must be cleared before players setup
+    fun clearField() {
+        controller.clearField()
     }
 
+    abstract fun setupPlayerX(player: LocalPlayer)
+
+    abstract fun setupPlayerO(player: LocalPlayer)
+
     open fun cancel() {
+        gameChannel.close()
         gameLoop.cancel()
     }
 
@@ -51,7 +51,7 @@ abstract class GameModel(val rows: Int, val cols: Int, val win: Int, player1: Pl
 }
 
 enum class GameType {
-    Local, Bluetooth, Network
+    Local, BluetoothClassic, BluetoothLE, Network
 }
 
 data class GameParamsData(val rows: Int, val cols: Int, val win: Int, val player1: PlayerType, val player2: PlayerType)

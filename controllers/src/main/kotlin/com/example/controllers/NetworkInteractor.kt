@@ -16,8 +16,8 @@ interface NetworkInteractor {
 }
 
 sealed class GameCreationStatus
-data class GameID(val ID: Short) : GameCreationStatus()
+data class GameID(val ID: Int) : GameCreationStatus()
 object CreationFailure : GameCreationStatus()
 data class Created(val client: NetworkClient) : GameCreationStatus()
 
-data class GameItem(val ID: Short, val settings: GameSettings)
+data class GameItem(val ID: Int, val settings: GameSettings)

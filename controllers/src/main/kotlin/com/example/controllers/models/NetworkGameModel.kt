@@ -1,98 +1,110 @@
 package com.example.controllers.models
 
-import com.example.controllers.BotPlayer
 import com.example.controllers.LocalPlayer
 import com.example.controllers.NetworkClient
+import com.example.controllers.PlayerAction
 import com.example.game.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.trySendBlocking
-import java.io.Closeable
 
 
 class NetworkGameModel(
     rows: Int,
     cols: Int,
     win: Int,
-    player1: PlayerType,
-    player2: PlayerType,
     scope: CoroutineScope,
     private val client: NetworkClient
-) : GameModel(rows, cols, win, player1, player2, scope) { // GameModel( scope) {
+) : GameModel(rows, cols, win, scope) { // GameModel( scope) {
     private val externalController = ExternalController(rows, cols, win)
     override val controller: GameController = externalController
-    override val gameLoop: Job
+    override var gameChannel = Channel<GameSignal>(2)
+        private set
 
-    companion object {
-        const val LGM_TAG = "LocalGameModel"
-    }
+    override lateinit var gameLoop: Job
+        private set
 
     private val handler = CoroutineExceptionHandler { _, throwable ->
         println("get error")
         val interruption = throwable as InterruptionException
-        println("try to send error")
-        gameChannel.trySendBlocking(GameInterruption(interruption.reason))
+        println("try to send error net")
+        val signal = GameInterruption(interruption.reason)
+        gameChannel.trySend(signal)
+        endSignal = signal
         gameChannel.close()
     }
 
-    internal lateinit var localPlayer: LocalPlayer
-    internal var localPlayerMask = 0
+    private var localPlayer: LocalPlayer? = null
+    private var localPlayerMask = 0
 
-    init {
-        arrayOf(player1, player2).forEachIndexed { i, player ->
-            if (player == PlayerType.Human || player == PlayerType.Bot) {
-                localPlayerMask = i
-                localPlayer = when (player) {
-                    PlayerType.Human -> clickRegister
-                    PlayerType.Bot -> BotPlayer(controller)
-                    else -> throw IllegalArgumentException("expect local player")
-                }
-            }
-        }
-
-        gameLoop = scope.launch(handler, CoroutineStart.LAZY) {
-            while (controller.turn < cols * rows && isActive) {
-                var move: Coord
+    override fun start() {
+        controller.clearField()
+        endSignal = null
+        check(localPlayer != null) { "local player not initialized" }
+        gameLoop = scope.launch(handler) {
+            while (isActive) {
+                var move: Coord? = null
                 if (controller.curPlayer() == localPlayerMask) {
-                    move = localPlayer.getMove()
-                    client.sendMove(move)
-                } else {
-                    move = client.getMove()
+                    move = localPlayer!!.getMove()
+                    if (move == null) {
+                        client.sendAction(PlayerAction.GiveUp)
+                    } else {
+                        client.sendMove(move)
+                    }
                 }
-                moveTo(move)
+                val resp = client.getResponse()
+                move = move ?: resp.move
+                if (move != null) moveTo(move)
 
-                val condition = client.getState()
+                val condition = resp.state
                 externalController.sendState(condition)
 
                 when (condition) {
                     is Continues -> {}
                     else -> {
-                        val end = EndState(condition)
-                        gameChannel.send(end)
+                        val signal = EndState(condition)
+                        gameChannel.trySend(signal)
                         gameChannel.close()
-                        endSignal = end
+                        endSignal = signal
+                        localPlayer = null
+                        gameChannel = Channel<GameSignal>(2)
                         return@launch
                     }
                 }
             }
-        }.apply {
-            invokeOnCompletion {
-                if (client is Closeable) client.close()
-            }
         }
     }
 
+    override fun setupPlayerX(player: LocalPlayer) {
+        require(localPlayer == null) { "player initialization violation: player already initialized" }
+        localPlayer = player
+        localPlayerMask = 0
+    }
+
+    override fun setupPlayerO(player: LocalPlayer) {
+        require(localPlayer == null) { "player initialization violation: player already initialized" }
+        localPlayer = player
+        localPlayerMask = 1
+    }
+
     override fun cancel() {
+        runBlocking { client.sendAction(PlayerAction.Leave) }
         super.cancel()
-        client.cancelGame()
+    }
+
+    companion object {
+        const val LGM_TAG = "LocalGameModel"
     }
 }
 
 
 sealed class ServerResponse
-data class GameMove(override val row: Int, override val col: Int) : ICoord, ServerResponse()
-data class State(val state: GameState) : ServerResponse()
-data class Interruption(val cause: InterruptCause) : ServerResponse()
+class Response(val move: Coord? = null, val state: GameState) : ServerResponse()
+class Interruption(val cause: InterruptCause) : ServerResponse()
 
 enum class InterruptCause(val code: Int) {
-    Disconnected(1000), OppLeave(1001), OppCheating(1002), Cheating(1003)
+    Disconnected(1000),
+    Leave(1001),
+    InvalidMove(1002),
+    Internal(1003)
 }

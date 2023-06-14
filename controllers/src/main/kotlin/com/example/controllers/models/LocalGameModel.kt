@@ -1,54 +1,75 @@
 package com.example.controllers.models
 
 
-import com.example.controllers.BotPlayer
 import com.example.controllers.LocalPlayer
-import com.example.game.Continues
-import com.example.game.Coord
-import com.example.game.Game
-import com.example.game.GameController
-import kotlinx.coroutines.*
+import com.example.controllers.PlayerInitializer
+import com.example.game.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
-class LocalGameModel(rows: Int, cols: Int, win: Int, player1: PlayerType, player2: PlayerType, scope: CoroutineScope) : GameModel(rows, cols, win, player1, player2, scope) {
+class LocalGameModel(rows: Int, cols: Int, win: Int, scope: CoroutineScope) :
+    GameModel(rows, cols, win, scope) {
     private val game = Game(rows, cols, win)
     override val controller: GameController = game
-    override val gameLoop: Job
-    val players: Array<LocalPlayer>
+    override var gameChannel = Channel<GameSignal>(2)
+        private set
+    override lateinit var gameLoop: Job
+        private set
+
+    private val players = arrayOfNulls<LocalPlayer?>(2)
+
 
     companion object {
         const val LGM_TAG = "LocalGameModel"
     }
 
-    init {
-        val playerX = when (player1) {
-            PlayerType.Human -> clickRegister
-            PlayerType.Bot -> BotPlayer(controller)
-            else -> throw IllegalArgumentException("expect only local players")
-        }
+    private fun CoroutineScope.cleanUp(state: GameState) {
+        val signal = EndState(state)
+        gameChannel.trySend(signal)
+        val oldChannel = gameChannel
+        endSignal = signal
+        players.fill(null)
+        gameChannel = Channel<GameSignal>(2)
+        oldChannel.close()
+    }
 
-        val playerO = when (player2) {
-            PlayerType.Human -> clickRegister
-            PlayerType.Bot -> BotPlayer(controller)
-            else -> throw IllegalArgumentException("expect only local players")
-        }
-        players = arrayOf(playerX, playerO)
-
-        gameLoop = scope.launch(start = CoroutineStart.LAZY) {
-            var move: Coord
+    override fun start() {
+        endSignal = null
+        check(players.none { it == null }) { "players not initialized" }
+        gameLoop = scope.launch() {
+            var move: Coord?
             while (isActive) {
-                move = players[controller.curPlayer()].getMove()
+                move = players[controller.curPlayer()]!!.getMove()
+                if (move == null) {
+                    cleanUp(
+                        Win(
+                            EndWinLine(
+                                Mark.values()[controller.otherPlayer()], null, null
+                            )
+                        )
+                    )
+                    return@launch
+                }
                 moveTo(move)
                 when (val state = game.gameState(move)) {
                     is Continues -> Unit
                     else -> {
-                        val end = EndState(state)
-                        gameChannel.send(end)
-                        gameChannel.close()
-                        endSignal = end
+                        cleanUp(state)
                         return@launch
                     }
                 }
             }
         }
+    }
+
+    override fun setupPlayerX(player: LocalPlayer) {
+        players[0] = player
+    }
+
+    override fun setupPlayerO(player: LocalPlayer) {
+        players[1] = player
     }
 }
