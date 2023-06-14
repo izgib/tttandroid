@@ -54,14 +54,37 @@ android {
 }
 */
 
+/*val testFixturesJar by tasks.existing(Jar::class)
+
+val sharedJars by configurations.creating {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+}*/
+
 dependencies {
-    api(project(":game"))
+    implementation(project(":game"))
     implementation("org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
     testImplementation("org.junit.jupiter:junit-jupiter:${Versions.junit5}")
+
     testFixturesImplementation(project(":game"))
     testFixturesImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}")
+    //sharedJars(files(testFixturesJar.get().outputs.files.singleFile))
 }
+
+kotlin.jvmToolchain(8)
+
+/*artifacts {
+    val file = testFixturesJar.get().outputs.files.singleFile
+    println("file: ${file.name}")
+    add(sharedJars.name, file) {
+        builtBy(testFixturesJar)
+    }
+}*/
+
+/*kotlin.target.compilations.named("test") {
+    associateWith(target.compilations.getByName("main"))
+}*/
 
 /*tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
